@@ -11,5 +11,8 @@ export const formatTime = (time: Date, now?: Date) => {
     // show 12:59 instead of 0:59
     hours = 12;
   }
-  return `${hours}:${time.getMinutes()} (${relative})`;
+  return `${hours}:${time
+    .getMinutes()
+    .toString()
+    .padStart(2, '0')} (${relative})`;
 };

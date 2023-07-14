@@ -99,15 +99,19 @@ const GroupOverview = (props: Props) => {
               />
             </div>
           </div>
-          <SignupTable
-            playerQuery={playerQuery}
-            signupStateQuery={signupStateQuery}
-          />
+          {signupStateQuery.data ? (
+            <SignupTable
+              playerQuery={playerQuery}
+              signupStateQuery={signupStateQuery}
+            />
+          ) : null}
           {signupStateQuery.data?.imageUri ? (
             <div className="flex flex-col items-center justify-center gap-4">
               <img src={signupStateQuery.data?.imageUri} alt="signup state" />
               {signupStateQuery.data?.takenAt ? (
-                <p>{formatTime(signupStateQuery.data?.takenAt)}</p>
+                <p>
+                  Picture taken at {formatTime(signupStateQuery.data?.takenAt)}
+                </p>
               ) : null}
             </div>
           ) : null}

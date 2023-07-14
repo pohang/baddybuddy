@@ -48,7 +48,9 @@ export default function Home() {
           }}
           disabled={createGroupLoading}
         >
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {createGroupLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : null}
           Create group
         </Button>
         {createGroupError ? (
