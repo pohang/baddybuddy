@@ -12,16 +12,67 @@ datasource db {
 }
 
 model Group {
-  id          String   @id
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  signupState Json?
+  id           String        @id
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  signupStates SignupState[]
+  players      Player[]
+}
+
+model SignupState {
+  id           Int           @id @default(autoincrement())
+  createdAt    DateTime      @default(now())
+  groupId      String
+  group        Group         @relation(fields: [groupId], references: [id])
+  fileName     String
+  takenAt      DateTime
+  courtSignups CourtSignup[]
+  active       Boolean       @default(false)
+
+  @@index([groupId])
+}
+
+model CourtSignup {
+  id            Int                 @id @default(autoincrement())
+  court         Int
+  signupStateId Int
+  signupState   SignupState         @relation(fields: [signupStateId], references: [id])
+  // null if court is reserved
+  startsAt      DateTime?
+  // null if court is reserved
+  endsAt        DateTime?
+  queuePosition Int
+  players       CourtSignupPlayer[]
+
+  @@index([signupStateId])
+}
+
+model CourtSignupPlayer {
+  id            Int         @id @default(autoincrement())
+  courtSignupId Int
+  courtSignup   CourtSignup @relation(fields: [courtSignupId], references: [id])
+  position      Int
+  player        String
+
+  @@index([courtSignupId])
+}
+
+model Player {
+  id       Int    @id @default(autoincrement())
+  groupId  String
+  group    Group  @relation(fields: [groupId], references: [id])
+  username String
+  password String
+
+  @@unique(fields: [groupId, username], name: "groupAndUsername")
+  @@index([groupId])
 }
 
 model GoogleVisionRequest {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   imageHash String   @unique
+  fileName  String
   result    Json?
 
   // used to check total requests for a month to avoid exceeding free tier
