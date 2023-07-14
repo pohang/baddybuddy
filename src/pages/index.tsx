@@ -1,11 +1,13 @@
 import { Button } from '~/components/ui/button';
 import { api } from '~/utils/api';
+import { Loader2 } from 'lucide-react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 
 export default function Home() {
   const router = useRouter();
+  const [createGroupLoading, setCreateGroupLoading] = React.useState(false);
   const [createGroupError, setCreateGroupError] = React.useState<
     string | null
   >();
@@ -13,6 +15,7 @@ export default function Home() {
   const createGroupMutation = api.groups.createGroup.useMutation({
     onMutate: () => {
       console.log('Creating group...');
+      setCreateGroupLoading(true);
       setCreateGroupError(null);
     },
     onSuccess: async (data) => {
@@ -22,6 +25,9 @@ export default function Home() {
     onError: (error) => {
       console.log(`Error while creating group: ${error.message}.`);
       setCreateGroupError(error.message);
+    },
+    onSettled: () => {
+      setCreateGroupLoading(false);
     },
   });
 
@@ -40,7 +46,9 @@ export default function Home() {
           onClick={() => {
             createGroupMutation.mutate();
           }}
+          disabled={createGroupLoading}
         >
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Create group
         </Button>
         {createGroupError ? (
