@@ -11,7 +11,7 @@ const GroupPage = () => {
   return (
     <>
       <Head>
-        <title>Baddy Buddy: {groupId}</title>
+        <title>Baddy Buddy</title>
         <meta
           name="description"
           content={`Badminton signups for group ${groupId}`}
