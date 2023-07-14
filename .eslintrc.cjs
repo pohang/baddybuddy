@@ -20,6 +20,9 @@ const config = {
   },
   plugins: ['@typescript-eslint'],
   extends: ['next/core-web-vitals', 'plugin:@typescript-eslint/recommended'],
+  ignorePatterns: [
+      'src/components/ui/*',
+  ],
   rules: {
     '@typescript-eslint/consistent-type-imports': [
       'warn',

@@ -1,16 +1,7 @@
 import { type TRPCClientErrorLike } from '@trpc/client';
 import { type UseTRPCQueryResult } from '@trpc/react-query/shared';
 import { type inferRouterOutputs } from '@trpc/server';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/ui/table';
 import { type AppRouter } from '~/server/api/root';
-import { formatTime } from '~/utils/time';
 import * as React from 'react';
 
 type Props = {

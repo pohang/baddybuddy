@@ -87,10 +87,10 @@ const PlayerList = (props: Props) => {
         status = `On ${court} after res`;
         sortIndex = Number.MAX_SAFE_INTEGER;
       } else if (startsAt < new Date()) {
-        status = `On ${court} until ${formatTime(signup.endsAt!)}`;
+        status = `On ${court} until ${formatTime(endsAt!)}`;
         sortIndex = startsAt.getTime();
       } else {
-        status = `Waiting for ${court}, on at ${formatTime(signup.endsAt!)}`;
+        status = `Waiting for ${court}, on at ${formatTime(endsAt!)}`;
         sortIndex = startsAt.getTime();
       }
     }

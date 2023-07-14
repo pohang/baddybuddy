@@ -145,7 +145,6 @@ const getCourtSignup = ({
 };
 
 const getMinutesLeftOrReserved = ({
-  court,
   textAnnotations,
   topLeft,
   sectionWidth,
@@ -158,7 +157,6 @@ const getMinutesLeftOrReserved = ({
   sectionHeight: number;
 }): number | 'reserved' => {
   const annotations = findAnnotationsOnLine({
-    court,
     textAnnotations,
     topLeft,
     sectionWidth,
@@ -178,7 +176,6 @@ const getMinutesLeftOrReserved = ({
 };
 
 const getNamesOnLine = ({
-  court,
   textAnnotations,
   topLeft,
   sectionWidth,
@@ -193,7 +190,6 @@ const getNamesOnLine = ({
   ratio: LineRatio;
 }): string[] => {
   const annotations = findAnnotationsOnLine({
-    court,
     textAnnotations,
     topLeft,
     sectionWidth,
@@ -221,14 +217,12 @@ const cleanDescription = (description: string | null | undefined) => {
 };
 
 const findAnnotationsOnLine = ({
-  court,
   textAnnotations,
   topLeft,
   sectionWidth,
   sectionHeight,
   ratio,
 }: {
-  court: number;
   textAnnotations: google.cloud.vision.v1.IEntityAnnotation[];
   topLeft: Vertex;
   sectionWidth: number;
