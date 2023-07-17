@@ -36,7 +36,7 @@ export const signupRouter = createTRPCRouter({
       const { groupId, fileName, takenAt } = input;
       const annotations = await imageParser.parseImage({ fileName });
 
-      const courtSignups = processAnnotations({ annotations, takenAt });
+      const { courtSignups } = processAnnotations({ annotations, takenAt });
       await ctx.prisma.signupState.create({
         data: {
           fileName,
@@ -53,6 +53,30 @@ export const signupRouter = createTRPCRouter({
         },
         include: includeClause,
       });
+    }),
+
+  debugSignupStateImage: publicProcedure
+    .input(
+      z.object({
+        fileName: z.string().min(1),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { fileName } = input;
+      const annotations = await imageParser.parseImage({ fileName });
+
+      const imageUri = await imageStorage.getPresignedUrlForDownload(fileName);
+
+      const { courtDebugInfo, courtSignups } = processAnnotations({
+        annotations,
+        takenAt: new Date(),
+      });
+
+      return {
+        imageUri,
+        courtDebugInfo,
+        courtSignups,
+      };
     }),
 
   getSignupState: publicProcedure
@@ -108,6 +132,7 @@ export const signupRouter = createTRPCRouter({
       return {
         signupsByCourt,
         takenAt: signupState.takenAt,
+        fileName: signupState.fileName,
         imageUri,
       };
     }),

@@ -6,6 +6,7 @@ import { Button } from '~/components/ui/button';
 import { useToast } from '~/components/ui/use-toast';
 import { api } from '~/utils/api';
 import { formatTime } from '~/utils/time';
+import { useRouter } from 'next/router';
 import * as React from 'react';
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
 };
 
 const GroupOverview = (props: Props) => {
+  const router = useRouter();
   const { groupId } = props;
   const groupQuery = api.groups.getGroup.useQuery(
     { groupId },
@@ -114,6 +116,15 @@ const GroupOverview = (props: Props) => {
                   Picture taken at {formatTime(signupStateQuery.data?.takenAt)}
                 </p>
               ) : null}
+              <Button
+                onClick={async () => {
+                  await router.push(
+                    `/debug?fileName=${signupStateQuery.data?.fileName || ''}`,
+                  );
+                }}
+              >
+                Debug
+              </Button>
             </div>
           ) : null}
         </div>

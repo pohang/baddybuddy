@@ -13,14 +13,14 @@ describe('processAnnotations', () => {
     });
     expect(results).toBeTruthy();
     // if you want to see what the results look like, uncomment the next lines
-    // expect(results.map((r) => ({
-    //   court: r.court,
-    //   queuePosition: r.queuePosition,
-    //   players: (r.players?.createMany?.data || [])
-    //     .map((p) => p.player)
-    //     .toString(),
-    //   startsAt: r.startsAt,
-    //   endsAt: r.endsAt,
-    // })).toBeNull();
+    expect(
+      results.courtSignups.map((r) => ({
+        court: r.court,
+        queuePosition: r.queuePosition,
+        players: r.players?.createMany?.data || [],
+        startsAt: r.startsAt,
+        endsAt: r.endsAt,
+      })),
+    ).toBeNull();
   });
 });

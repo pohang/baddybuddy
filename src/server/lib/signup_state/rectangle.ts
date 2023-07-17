@@ -5,7 +5,7 @@ export type Vertex = {
   y: number;
 };
 
-type Rectangle = {
+export type Rectangle = {
   topLeft: Vertex;
   topRight: Vertex;
   bottomLeft: Vertex;
@@ -54,9 +54,15 @@ export const calculateArea = (r: Rectangle): number => {
   return x * y;
 };
 
-export const calculateMid = (r: Rectangle): Vertex => {
-  return {
-    x: (r.topRight.x + r.topLeft.x) / 2,
-    y: (r.bottomLeft.y + r.topLeft.y) / 2,
-  };
+export const isAWithinB = (a: Rectangle, b: Rectangle): boolean => {
+  return (
+    b.topLeft.x <= a.topLeft.x &&
+    b.topLeft.y <= a.topLeft.y &&
+    b.bottomLeft.x <= a.bottomLeft.x &&
+    b.bottomLeft.y >= a.bottomLeft.y &&
+    b.topRight.x >= a.topRight.x &&
+    b.topRight.y <= a.topRight.y &&
+    b.bottomRight.x >= a.bottomRight.x &&
+    b.bottomRight.y >= a.bottomRight.y
+  );
 };
