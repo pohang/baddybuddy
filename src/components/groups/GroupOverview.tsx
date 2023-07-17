@@ -84,6 +84,7 @@ const GroupOverview = (props: Props) => {
           />
         </div>
         <PlayerList
+          groupId={groupId}
           playerQuery={playerQuery}
           signupStateQuery={signupStateQuery}
         />

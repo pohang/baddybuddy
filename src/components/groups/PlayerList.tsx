@@ -1,6 +1,7 @@
 import { type TRPCClientErrorLike } from '@trpc/client';
 import { type UseTRPCQueryResult } from '@trpc/react-query/shared';
 import { type inferRouterOutputs } from '@trpc/server';
+import RemovePlayerDialog from '~/components/groups/RemovePlayerDialog';
 import {
   Table,
   TableBody,
@@ -14,6 +15,7 @@ import { formatTime } from '~/utils/time';
 import * as React from 'react';
 
 type Props = {
+  groupId: string;
   playerQuery: UseTRPCQueryResult<
     inferRouterOutputs<AppRouter>['players']['getPlayers'],
     TRPCClientErrorLike<AppRouter>
@@ -25,7 +27,7 @@ type Props = {
 };
 
 const PlayerList = (props: Props) => {
-  const { playerQuery, signupStateQuery } = props;
+  const { groupId, playerQuery, signupStateQuery } = props;
 
   if (playerQuery.isLoading || signupStateQuery.isLoading) {
     return (
@@ -120,6 +122,13 @@ const PlayerList = (props: Props) => {
             <TableCell>{player.username}</TableCell>
             <TableCell>{player.password}</TableCell>
             <TableCell>{player.status}</TableCell>
+            <TableCell>
+              <RemovePlayerDialog
+                groupId={groupId}
+                username={player.username}
+                onPlayerRemove={playerQuery.refetch}
+              />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

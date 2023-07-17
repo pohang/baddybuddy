@@ -18,6 +18,7 @@ import {
 } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import { api } from '~/utils/api';
+import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -40,6 +41,7 @@ const formSchema = z.object({
 const AddPlayerDialog = (props: Props) => {
   const { groupId, onPlayerAdd } = props;
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const addPlayerMutation = api.players.addPlayer.useMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -53,6 +55,7 @@ const AddPlayerDialog = (props: Props) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log('Adding new player...');
+    setLoading(true);
     const { username, password, addAnother } = values;
     await addPlayerMutation.mutateAsync(
       {
@@ -69,6 +72,9 @@ const AddPlayerDialog = (props: Props) => {
                 'Username already exists. You can delete the player and re-add if you need to change the password.',
             });
           }
+        },
+        onSettled: () => {
+          setLoading(false);
         },
       },
     );
@@ -134,7 +140,12 @@ const AddPlayerDialog = (props: Props) => {
                 </FormItem>
               )}
             />
-            <Button type="submit">Add</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              Add
+            </Button>
           </form>
         </Form>
       </DialogContent>

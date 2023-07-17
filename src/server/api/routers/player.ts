@@ -6,8 +6,8 @@ export const playerRouter = createTRPCRouter({
     .input(
       z.object({
         groupId: z.string(),
-        username: z.string(),
-        password: z.string(),
+        username: z.string().trim().toLowerCase(),
+        password: z.string().trim().toLowerCase(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -25,7 +25,12 @@ export const playerRouter = createTRPCRouter({
     }),
 
   removePlayer: publicProcedure
-    .input(z.object({ groupId: z.string(), username: z.string() }))
+    .input(
+      z.object({
+        groupId: z.string(),
+        username: z.string().trim().toLowerCase(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { groupId, username } = input;
       return ctx.prisma.player.delete({
