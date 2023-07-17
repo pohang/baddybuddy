@@ -1,7 +1,4 @@
-// Find the N biggest (by bounding poly size) occurrences of the word "Court".
-import { type google } from '@google-cloud/vision/build/protos/protos';
 import {
-  asRectangle,
   calculateArea,
   type Rectangle,
   type Vertex,
@@ -37,7 +34,7 @@ export const findTopLeftVerticesOfLargestText = ({
   }
 
   matchingTextAnnotations.sort(
-    (a, b) => calculateArea(b.rectangle!) - calculateArea(a.rectangle!),
+    (a, b) => calculateArea(b.rectangle) - calculateArea(a.rectangle),
   );
 
   return matchingTextAnnotations.slice(0, n).map((annotation) => {

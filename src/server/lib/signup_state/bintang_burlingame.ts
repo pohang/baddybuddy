@@ -2,15 +2,15 @@ import { type TextAnnotationsResponse } from '~/server/lib/image_parser/google_v
 import {
   asRectangle,
   isAWithinB,
-  Rectangle,
+  type Rectangle,
   type Vertex,
 } from '~/server/lib/signup_state/rectangle';
 import {
-  AnnotationWithRectangle,
   findTopLeftVerticesOfLargestText,
   getRectangleForCourt,
   groupAnnotationsAsLines,
   verticesAsGrid,
+  type AnnotationWithRectangle,
 } from '~/server/lib/signup_state/utils';
 import { type Prisma } from '.prisma/client';
 
