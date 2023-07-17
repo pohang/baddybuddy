@@ -62,6 +62,8 @@ const ImageUploadDialog = (props: Props) => {
     }
 
     if (success) {
+      setSelectedFile(null);
+      setSelectedFilePreviewUri(null);
       setOpen(false);
       onUploadSuccess();
     }

@@ -77,6 +77,7 @@ const AddPlayerDialog = (props: Props) => {
       form.reset();
       form.setValue('addAnother', true);
     } else {
+      form.reset();
       onPlayerAdd();
       setOpen(false);
     }
