@@ -27,7 +27,6 @@ const loadImage = (
     });
   };
   img.onerror = (err) => {
-    console.log('img error');
     console.error(err);
   };
 };
@@ -79,7 +78,6 @@ const Canvas = (props: DebugData) => {
         data.courtDebugInfo
           .map((x) => x.boundingPolyForCourt)
           .forEach((rect) => {
-            console.log(rect);
             ctx.strokeStyle = 'red';
             ctx.lineWidth = 1;
             ctx.beginPath();

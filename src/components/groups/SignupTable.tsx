@@ -49,7 +49,6 @@ const PlayerList = (props: Props) => {
 
   const renderCourt = (court: number) => {
     const signups = signupStateQuery.data?.signupsByCourt?.get(court) || [];
-    console.log(signups);
     let minutesLeft;
     if (signups.length === 0) {
       minutesLeft = '';

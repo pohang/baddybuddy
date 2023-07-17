@@ -190,8 +190,12 @@ const getCourtSignup = ({
   };
 };
 
-const cleanDescription = (description: string) => {
-  return description
+const cleanUsername = (username: string) => {
+  if (/^[0-9]+$/.test(username)) {
+    return '';
+  }
+
+  return username
     .replaceAll(/-|1\.|2\.|3\.|:/g, '')
     .trim()
     .toLowerCase();
@@ -199,7 +203,7 @@ const cleanDescription = (description: string) => {
 
 const getNamesFromLine = (line: string[]): string[] => {
   return line
-    .map((l) => cleanDescription(l))
+    .map((l) => cleanUsername(l))
     .filter((w) => {
       return w.length > 0 && w !== 'current' && w !== 'players';
     });
