@@ -92,7 +92,7 @@ const PlayerList = (props: Props) => {
         status = `On ${court} until ${formatTime(endsAt!)}`;
         sortIndex = startsAt.getTime();
       } else {
-        status = `Waiting for ${court}, on at ${formatTime(startsAt!)}`;
+        status = `Waiting for ${court}, on at ${formatTime(startsAt)}`;
         sortIndex = startsAt.getTime();
       }
     }
