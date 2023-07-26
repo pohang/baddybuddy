@@ -79,7 +79,10 @@ const GroupOverview = (props: Props) => {
       </div>
       <div>
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl">Players</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl">Players</h2>
+            <p>{playerQuery.data?.length} total</p>
+          </div>
           <AddPlayerDialog
             groupId={groupId}
             onPlayerAdd={playerQuery.refetch}
