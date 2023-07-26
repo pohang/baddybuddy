@@ -29,3 +29,5 @@ To make changes to the DB schema, update `prisma/schema.prisma` and then run
 ```bash
 npx prisma db push
 ```
+
+The UI components in `src/components/ui` are from [shadcn](https://ui.shadcn.com/).
