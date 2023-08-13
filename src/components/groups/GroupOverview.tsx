@@ -1,6 +1,8 @@
 import AddPlayerDialog from '~/components/groups/AddPlayerDialog';
 import ImageUploadDialog from '~/components/groups/ImageUploadDialog';
-import PlayerList from '~/components/groups/PlayerList';
+import NeedsSignupList from '~/components/groups/NeedsSignupList';
+import OurCourtsList from '~/components/groups/OurCourtsList';
+import ShowAllPlayersDialog from '~/components/groups/ShowAllPlayersDialog';
 import SignupTable from '~/components/groups/SignupTable';
 import { Button } from '~/components/ui/button';
 import { useToast } from '~/components/ui/use-toast';
@@ -65,7 +67,7 @@ const GroupOverview = (props: Props) => {
   }
 
   return (
-    <div className="flex flex-col items-stretch justify-center gap-12">
+    <div className="flex flex-col items-stretch justify-center gap-4">
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4 mx-auto justify-center">
           <div className="flex flex-col">
@@ -77,19 +79,32 @@ const GroupOverview = (props: Props) => {
           <Button onClick={handleCopyLink}>Copy link</Button>
         </div>
       </div>
-      <div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl">Players</h2>
-            <p>{playerQuery.data?.length} total</p>
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <p>{playerQuery.data?.length} players</p>
+        </div>
+        <div className="flex gap-2">
+          <ShowAllPlayersDialog
+            groupId={groupId}
+            playerQuery={playerQuery}
+            signupStateQuery={signupStateQuery}
+          />
           <AddPlayerDialog
             groupId={groupId}
             onPlayerAdd={playerQuery.refetch}
           />
         </div>
-        <PlayerList
-          groupId={groupId}
+      </div>
+      <div className="flex flex-col">
+        <h2 className="text-2xl">Needs signup</h2>
+        <NeedsSignupList
+          playerQuery={playerQuery}
+          signupStateQuery={signupStateQuery}
+        />
+      </div>
+      <div className="flex flex-col">
+        <h2 className="text-2xl">Our courts</h2>
+        <OurCourtsList
           playerQuery={playerQuery}
           signupStateQuery={signupStateQuery}
         />
@@ -97,7 +112,7 @@ const GroupOverview = (props: Props) => {
       <div>
         <div className="flex flex-col items-stretch justify-center gap-12">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl">Courts</h2>
+            <h2 className="text-2xl">All Courts</h2>
             <div className="flex items-center gap-2">
               <ImageUploadDialog
                 groupId={groupId}

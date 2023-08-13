@@ -78,37 +78,33 @@ const PlayerList = (props: Props) => {
   const formattedPlayers = players.map((p) => {
     const signup = playerStatus.get(p.username.toLowerCase());
     let status;
-    let sortIndex;
 
     if (signup == null) {
       status = 'Needs sign up';
-      sortIndex = 0;
     } else {
       const { startsAt, endsAt, court } = signup;
       if (startsAt == null) {
         status = `On ${court} after res`;
-        sortIndex = Number.MAX_SAFE_INTEGER;
       } else if (startsAt < new Date()) {
         status = `On ${court} until ${formatTime(endsAt!)}`;
-        sortIndex = startsAt.getTime();
       } else {
         status = `Waiting for ${court}, on at ${formatTime(startsAt)}`;
-        sortIndex = startsAt.getTime();
       }
     }
 
     return {
       username: p.username,
       password: p.password,
-      sortIndex,
       status,
     };
   });
 
-  formattedPlayers.sort((a, b) => a.sortIndex - b.sortIndex);
+  formattedPlayers.sort((a, b) =>
+    new Intl.Collator().compare(a.username, b.username),
+  );
 
   return (
-    <Table>
+    <Table className="block overflow-y-scroll max-h-96">
       <TableHeader>
         <TableRow>
           <TableHead>Username</TableHead>
