@@ -1,4 +1,5 @@
 import { type TextAnnotationsResponse } from '~/server/lib/image_parser/google_vision_ai_client';
+import { type CourtSignup } from '~/server/lib/signup_state/court_signup';
 import {
   asRectangle,
   isAWithinB,
@@ -12,7 +13,6 @@ import {
   verticesAsGrid,
   type AnnotationWithRectangle,
 } from '~/server/lib/signup_state/utils';
-import { type Prisma } from '.prisma/client';
 
 const EXPECTED_NUM_GROUPS = 14;
 const COURT_SIGNUP_DURATION_MINUTES = 30;
@@ -25,7 +25,7 @@ type CourtDebugInfo = {
 };
 
 type ProcessAnnotationsResponse = {
-  courtSignups: Prisma.CourtSignupCreateWithoutSignupStateInput[];
+  courtSignups: CourtSignup[];
   courtDebugInfo: CourtDebugInfo[];
 };
 
@@ -67,7 +67,7 @@ export const processAnnotations = ({
     perRow: 4,
   });
 
-  const courtSignups: Prisma.CourtSignupCreateWithoutSignupStateInput[] = [];
+  const courtSignups: CourtSignup[] = [];
   const courtDebugInfo: CourtDebugInfo[] = [];
 
   for (let row = 0; row < topLeftVerticesOfCourtGrid.length; row += 1) {
@@ -157,7 +157,7 @@ const getCourtSignup = ({
   takenAt: Date;
   queuePosition: number;
   minutesLeftOrReserved: number | 'reserved';
-}): Prisma.CourtSignupCreateWithoutSignupStateInput | null => {
+}): CourtSignup | null => {
   if (
     names.length === 0 &&
     !(minutesLeftOrReserved === 'reserved' && queuePosition === 0)
@@ -182,11 +182,7 @@ const getCourtSignup = ({
     startsAt,
     endsAt,
     queuePosition,
-    players: {
-      createMany: {
-        data: names.map((name, i) => ({ player: name, position: i })),
-      },
-    },
+    players: names,
   };
 };
 
@@ -195,10 +191,20 @@ const cleanUsername = (username: string) => {
     return '';
   }
 
-  return username
-    .replaceAll(/-|1\.|2\.|3\.|:/g, '')
-    .trim()
-    .toLowerCase();
+  let cleaned = username;
+
+  // Depending on what box the OCR draws, it might pick up things like 1. or the hyphen in between
+  // names.
+  cleaned = cleaned.replaceAll(/-|1\.|2\.|3\.|:/g, '').trim();
+
+  // Bintang uses sentence case for each username. OCR gets confused with names like Rl and thinks
+  // that the second character is an uppercase I.
+  const containsUpperIPastFirstChar = cleaned.substring(1).includes('I');
+  if (containsUpperIPastFirstChar) {
+    cleaned = cleaned.charAt(0) + cleaned.substring(1).replaceAll('I', 'l');
+  }
+
+  return cleaned.toLowerCase();
 };
 
 const getNamesFromLine = (line: string[]): string[] => {

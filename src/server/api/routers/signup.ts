@@ -2,6 +2,7 @@ import { createTRPCRouter, publicProcedure } from '~/server/api/trpc';
 import { GoogleVisionAiClient } from '~/server/lib/image_parser/google_vision_ai_client';
 import ImageStorage from '~/server/lib/image_storage/google_storage';
 import { processAnnotations } from '~/server/lib/signup_state/bintang_burlingame';
+import { type CourtSignup } from '~/server/lib/signup_state/court_signup';
 import { z } from 'zod';
 import { Prisma } from '.prisma/client';
 
@@ -47,9 +48,7 @@ export const signupRouter = createTRPCRouter({
             },
           },
           active: true,
-          courtSignups: {
-            create: courtSignups,
-          },
+          courtSignupState: courtSignups as Prisma.JsonArray,
         },
         include: includeClause,
       });
@@ -106,7 +105,21 @@ export const signupRouter = createTRPCRouter({
           players: string[];
         }[]
       >();
-      signupState.courtSignups.forEach((signup) => {
+      const courtSignups: CourtSignup[] = (
+        signupState.courtSignupState as Prisma.JsonArray
+      ).map((val) => {
+        const obj = val as Prisma.JsonObject;
+        return {
+          court: obj['court'] as number,
+          startsAt: obj['startsAt']
+            ? new Date(obj['startsAt'] as string)
+            : null,
+          endsAt: obj['endsAt'] ? new Date(obj['endsAt'] as string) : null,
+          queuePosition: obj['queuePosition'] as number,
+          players: obj['players'] as string[],
+        };
+      });
+      courtSignups.forEach((signup) => {
         if (signup.endsAt && signup.endsAt < new Date()) {
           return;
         }
@@ -116,12 +129,11 @@ export const signupRouter = createTRPCRouter({
         }
 
         const players = signup.players;
-        players.sort((a, b) => a.position - b.position);
 
         signupsByCourt.get(signup.court)!.push({
           startsAt: signup.startsAt,
           endsAt: signup.endsAt,
-          players: players.map((p) => p.player),
+          players,
         });
       });
 
