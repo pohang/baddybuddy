@@ -9,12 +9,6 @@ import { Prisma } from '.prisma/client';
 const imageParser = GoogleVisionAiClient.forProd();
 const imageStorage = new ImageStorage();
 
-const includeClause = {
-  courtSignups: {
-    include: { players: true },
-  },
-};
-
 export const signupRouter = createTRPCRouter({
   createPresignedUploadUrl: publicProcedure.mutation(async () => {
     const fileName = `${new Date().toISOString().replace(/:/g, '_')}.jpeg`;
@@ -50,7 +44,6 @@ export const signupRouter = createTRPCRouter({
           active: true,
           courtSignupState: courtSignups as Prisma.JsonArray,
         },
-        include: includeClause,
       });
     }),
 
@@ -91,7 +84,6 @@ export const signupRouter = createTRPCRouter({
           createdAt: Prisma.SortOrder.desc,
         },
         take: 1,
-        include: includeClause,
       });
       if (signupState == null) {
         return null;
