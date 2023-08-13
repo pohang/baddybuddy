@@ -26,6 +26,7 @@ const ImageUploadDialog = (props: Props) => {
   const [fileSelectedAt, setFileSelectedAt] = React.useState<Date | null>(null);
   const [open, setOpen] = React.useState(false);
   const [uploadProcessing, setUploadProcessing] = React.useState(false);
+  const [error, setError] = React.useState('');
 
   const presignedUrlMutation =
     api.signups.createPresignedUploadUrl.useMutation();
@@ -42,6 +43,7 @@ const ImageUploadDialog = (props: Props) => {
     let success;
 
     try {
+      setError('');
       setUploadProcessing(true);
       // upload to google cloud
       const presignedUrl = await presignedUrlMutation.mutateAsync();
@@ -57,6 +59,12 @@ const ImageUploadDialog = (props: Props) => {
         takenAt: fileSelectedAt!,
       });
       success = true;
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Unexpected error occurred.');
+      }
     } finally {
       setUploadProcessing(false);
     }
@@ -98,6 +106,7 @@ const ImageUploadDialog = (props: Props) => {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={selectedFilePreviewUri} alt="signup preview" />
           ) : null}
+          {error ? <p className="text-red-500">{error}</p> : null}
         </div>
         <DialogFooter>
           <div className="flex justify-end gap-4">
