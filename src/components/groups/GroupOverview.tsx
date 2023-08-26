@@ -106,7 +106,7 @@ const GroupOverview = (props: Props) => {
         />
       </div>
       <div>
-        <div className="flex flex-col items-stretch justify-center gap-12">
+        <div className="flex flex-col items-stretch justify-center gap-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl">All courts</h2>
             <div className="flex items-center gap-2">
