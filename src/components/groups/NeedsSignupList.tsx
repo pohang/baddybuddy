@@ -11,7 +11,7 @@ import {
 } from '~/components/ui/table';
 import { type AppRouter } from '~/server/api/root';
 import * as React from 'react';
-import { PASSWORD_AS_EMOJI } from '~/utils/emoji';
+import { PasswordEmojis } from '~/utils/emoji';
 
 type Props = {
   playerQuery: UseTRPCQueryResult<
@@ -91,7 +91,7 @@ const NeedsSignupList = (props: Props) => {
         {playersNotSignedUp.map((player, i) => (
           <TableRow key={i}>
             <TableCell className="p-2">{player.username}</TableCell>
-            <TableCell className="p-2">{`${PASSWORD_AS_EMOJI[player.password] ?? ''} ${player.password}`}</TableCell>
+            <TableCell className="p-2">{`${PasswordEmojis[player.password] ?? ''} ${player.password}`}</TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -13,7 +13,7 @@ import {
 import { type AppRouter } from '~/server/api/root';
 import { formatTime, getMinRemaining } from '~/utils/time';
 import * as React from 'react';
-import { PASSWORD_AS_EMOJI } from '~/utils/emoji';
+import { PasswordEmojis } from '~/utils/emoji';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Props = {

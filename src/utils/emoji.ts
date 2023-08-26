@@ -1,5 +1,5 @@
 // Burlingame only supports these, may need to add more for other locations (frog, etc)
-export const PASSWORD_AS_EMOJI: Record<string, string> = {
+export const PasswordEmojis: Record<string, string> = {
   'cat': '😺',
   'dog': '🐶',
   'snake': '🐍',

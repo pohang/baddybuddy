@@ -13,7 +13,7 @@ import { type AppRouter } from '~/server/api/root';
 import { getMinRemaining } from '~/utils/time';
 import * as React from 'react';
 import _ from 'lodash';
-import { PASSWORD_AS_EMOJI } from '~/utils/emoji';
+import { PasswordEmojis } from '~/utils/emoji';
 
 type Props = {
   playerQuery: UseTRPCQueryResult<
@@ -104,7 +104,7 @@ const OurCourtsList = (props: Props) => {
           if (player in playerData) {
             return (
               <div key={i} style={ourPlayerPillStyles}>
-                {`${player} ${PASSWORD_AS_EMOJI[playerData[player]!.password] ?? ''}`}
+                {`${player} ${PasswordEmojis[playerData[player]!.password] ?? ''}`}
               </div>
             );
           }

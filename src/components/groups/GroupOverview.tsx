@@ -9,8 +9,7 @@ import { formatTime } from '~/utils/time';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import PlayerList from './PlayerList';
-import { useLocalStorage } from "usehooks-ts";
-import { faClone, faUser } from '@fortawesome/free-regular-svg-icons';
+import { faClone } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Props = {
@@ -21,7 +20,8 @@ const GroupOverview = (props: Props) => {
   const router = useRouter();
   const { groupId } = props;
 
-  const [onlyShowUnsigned, setOnlyShowUnsigned] = useLocalStorage('onlyShowUnsignedPlayers', false);
+  // todo: later
+  // const [onlyShowUnsigned, setOnlyShowUnsigned] = useLocalStorage('onlyShowUnsignedPlayers', false);
 
   const groupQuery = api.groups.getGroup.useQuery(
     { groupId },

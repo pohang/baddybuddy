@@ -16,7 +16,6 @@ export default class ImageStorage {
         action: 'write',
         expires: Date.now() + 15 * 60 * 1000, // 15 minutes
       });
-    console.log('url', url);
     return Promise.resolve(url);
   }
 
