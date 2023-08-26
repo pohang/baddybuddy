@@ -18,7 +18,7 @@ const GroupPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="max-w-sm md:max-w-lg mx-auto p-8">
+      <main className="mx-auto p-4">
         <GroupOverview groupId={groupId} />
       </main>
       <Toaster />

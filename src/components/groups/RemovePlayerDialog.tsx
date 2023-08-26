@@ -10,6 +10,8 @@ import {
 import { api } from '~/utils/api';
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimesCircle } from '@fortawesome/free-regular-svg-icons';
 
 type Props = {
   groupId: string;
@@ -44,7 +46,7 @@ const RemovePlayerDialog = (props: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost">X</Button>
+        <Button variant="ghost"><FontAwesomeIcon icon={faTimesCircle}></FontAwesomeIcon></Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

@@ -22,10 +22,14 @@ import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-regular-svg-icons';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = {
   groupId: string;
   onPlayerAdd: () => void;
+  playerCount: number;
 };
 
 const formSchema = z.object({
@@ -39,10 +43,11 @@ const formSchema = z.object({
 });
 
 const AddPlayerDialog = (props: Props) => {
-  const { groupId, onPlayerAdd } = props;
+  const { groupId, onPlayerAdd, playerCount } = props;
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const addPlayerMutation = api.players.addPlayer.useMutation();
+  const [freshVisit, setFreshVisit] = useLocalStorage(`freshVisit-${groupId}`, true);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,7 +74,7 @@ const AddPlayerDialog = (props: Props) => {
             form.setError('username', {
               type: 'custom',
               message:
-                'Username already exists. You can delete the player and re-add if you need to change the password.',
+                'Player already exists. Delete and re-add the player to update the password.',
             });
           }
         },
@@ -85,14 +90,28 @@ const AddPlayerDialog = (props: Props) => {
     } else {
       form.reset();
       onPlayerAdd();
-      setOpen(false);
+      onClose();
     }
   };
 
+  const onOpenChange = (open: boolean) => {
+    setFreshVisit(false);
+    setOpen(open);
+  }
+
+  const onClose = () => {
+    onOpenChange(false);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open || freshVisit} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button>Add Player</Button>
+        <Button variant='outline'>
+          <div className='flex gap-1 items-center'>
+            <FontAwesomeIcon icon={faUser} />
+            <span>{playerCount}</span>
+          </div>
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

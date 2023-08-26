@@ -11,8 +11,10 @@ import {
   TableRow,
 } from '~/components/ui/table';
 import { type AppRouter } from '~/server/api/root';
-import { formatTime } from '~/utils/time';
+import { formatTime, getMinRemaining } from '~/utils/time';
 import * as React from 'react';
+import { PASSWORD_AS_EMOJI } from '~/utils/emoji';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Props = {
   groupId: string;
@@ -80,15 +82,15 @@ const PlayerList = (props: Props) => {
     let status;
 
     if (signup == null) {
-      status = 'Needs sign up';
+      status = '🚫';
     } else {
       const { startsAt, endsAt, court } = signup;
       if (startsAt == null) {
-        status = `On ${court} after res`;
-      } else if (startsAt < new Date()) {
-        status = `On ${court} until ${formatTime(endsAt!)}`;
+        status = `${court} (after res)`;
+      } else if (startsAt < new Date() && endsAt) {
+        status = `${court} (${getMinRemaining(endsAt)}m left)`;
       } else {
-        status = `Waiting for ${court}, on at ${formatTime(startsAt)}`;
+        status = `${court} in ${getMinRemaining(startsAt)}m`;
       }
     }
 
@@ -103,28 +105,34 @@ const PlayerList = (props: Props) => {
     new Intl.Collator().compare(a.username, b.username),
   );
 
+  if (!formattedPlayers.length) {
+    return <div className='mx-auto text-gray-500'>No players yet</div>
+  }
+
   return (
-    <Table className="block overflow-y-scroll max-h-96">
+    <Table className="overflow-y-scroll max-h-96 table-auto">
       <TableHeader>
         <TableRow>
-          <TableHead>Username</TableHead>
-          <TableHead>Password</TableHead>
-          <TableHead>Status</TableHead>
+          <TableHead className='p-1'></TableHead>
+          <TableHead className='p-1'>User</TableHead>
+          <TableHead className='p-1'>Animal</TableHead>
+          <TableHead className='p-1'>Court</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {formattedPlayers.map((player, i) => (
-          <TableRow key={i}>
-            <TableCell>{player.username}</TableCell>
-            <TableCell>{player.password}</TableCell>
-            <TableCell>{player.status}</TableCell>
-            <TableCell>
+        {formattedPlayers.map((player) => (
+          <TableRow key={player.username}>
+            <TableCell className='p-0'>
               <RemovePlayerDialog
                 groupId={groupId}
                 username={player.username}
                 onPlayerRemove={playerQuery.refetch}
               />
             </TableCell>
+            <TableCell className='p-1'><div style={{ overflowWrap: 'anywhere' }}>{player.username}</div></TableCell>
+            <TableCell className='p-1' style={{ whiteSpace: 'nowrap' }}>{player.password}</TableCell>
+            <TableCell className='p-1'>{player.status}</TableCell>
+
           </TableRow>
         ))}
       </TableBody>

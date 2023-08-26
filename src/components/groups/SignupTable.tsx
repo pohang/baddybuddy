@@ -3,6 +3,9 @@ import { type UseTRPCQueryResult } from '@trpc/react-query/shared';
 import { type inferRouterOutputs } from '@trpc/server';
 import { type AppRouter } from '~/server/api/root';
 import * as React from 'react';
+import { UrgencyColors, UrgencyStatus, getExpiringUrgency } from '~/utils/time';
+import { faClock } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Props = {
   playerQuery: UseTRPCQueryResult<
@@ -58,10 +61,15 @@ const PlayerList = (props: Props) => {
       const endsAt = signups[0]!.endsAt;
       minutesLeft = Math.ceil((endsAt.getTime() - Date.now()) / 1000 / 60);
     }
+
+    const urgency = typeof minutesLeft === 'number' ? getExpiringUrgency(minutesLeft) : undefined;
+    const color = urgency ? UrgencyColors[urgency] : 'gray';
+
+    const minutesLeftLabel = typeof minutesLeft === 'number' ? `${minutesLeft}m` : minutesLeft === undefined ? 'n/a' : minutesLeft;
     return (
       <div className="flex flex-col text-xs">
-        <div className="font-bold">Court {court}</div>
-        <div>Minutes left: {minutesLeft}</div>
+        <div className="flex gap-1"><span className='font-bold'>Court {court}</span> <div style={{ color }}><FontAwesomeIcon icon={faClock}></FontAwesomeIcon>&nbsp;{minutesLeftLabel}</div>
+        </div>
         <div>
           {signups.map((signup, signupI) => {
             return (
@@ -70,7 +78,7 @@ const PlayerList = (props: Props) => {
                   const key = `${court}-${signupI}-${playerI}`;
                   if (playerNames.includes(player)) {
                     return (
-                      <div key={key} className="text-green-300">
+                      <div key={key} className="text-green-600">
                         {player}
                       </div>
                     );
