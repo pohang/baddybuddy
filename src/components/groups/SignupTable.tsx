@@ -3,7 +3,7 @@ import { type UseTRPCQueryResult } from '@trpc/react-query/shared';
 import { type inferRouterOutputs } from '@trpc/server';
 import { type AppRouter } from '~/server/api/root';
 import * as React from 'react';
-import { UrgencyColors, UrgencyStatus, getExpiringUrgency } from '~/utils/time';
+import { UrgencyColors, getExpiringUrgency } from '~/utils/time';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 

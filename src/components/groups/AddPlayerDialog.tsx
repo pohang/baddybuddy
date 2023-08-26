@@ -23,8 +23,8 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-regular-svg-icons';
 import { useLocalStorage } from 'usehooks-ts';
+import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 
 type Props = {
   groupId: string;
@@ -48,11 +48,12 @@ const AddPlayerDialog = (props: Props) => {
   const [loading, setLoading] = React.useState(false);
   const addPlayerMutation = api.players.addPlayer.useMutation();
   const [freshVisit, setFreshVisit] = useLocalStorage(`freshVisit-${groupId}`, true);
+  const [savedUsername, setSavedUserName] = useLocalStorage(`username`, '');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: '',
+      username: savedUsername,
       password: '',
       addAnother: false,
     },
@@ -88,6 +89,7 @@ const AddPlayerDialog = (props: Props) => {
       form.reset();
       form.setValue('addAnother', true);
     } else {
+      setSavedUserName(form.getValues().username)
       form.reset();
       onPlayerAdd();
       onClose();
@@ -108,7 +110,7 @@ const AddPlayerDialog = (props: Props) => {
       <DialogTrigger asChild>
         <Button variant='outline'>
           <div className='flex gap-1 items-center'>
-            <FontAwesomeIcon icon={faUser} />
+            <FontAwesomeIcon icon={faUserPlus} />
             <span>{playerCount}</span>
           </div>
         </Button>

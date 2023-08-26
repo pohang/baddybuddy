@@ -11,10 +11,9 @@ import {
   TableRow,
 } from '~/components/ui/table';
 import { type AppRouter } from '~/server/api/root';
-import { formatTime, getMinRemaining } from '~/utils/time';
+import { getMinRemaining } from '~/utils/time';
 import * as React from 'react';
-import { PasswordEmojis } from '~/utils/emoji';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 
 type Props = {
   groupId: string;
@@ -80,11 +79,15 @@ const PlayerList = (props: Props) => {
   const formattedPlayers = players.map((p) => {
     const signup = playerStatus.get(p.username.toLowerCase());
     let status;
+    let end = new Date(0);
 
     if (signup == null) {
       status = '🚫';
     } else {
       const { startsAt, endsAt, court } = signup;
+      if (endsAt) {
+        end = endsAt;
+      }
       if (startsAt == null) {
         status = `${court} (after res)`;
       } else if (startsAt < new Date() && endsAt) {
@@ -98,12 +101,13 @@ const PlayerList = (props: Props) => {
       username: p.username,
       password: p.password,
       status,
+      end
     };
-  });
-
-  formattedPlayers.sort((a, b) =>
-    new Intl.Collator().compare(a.username, b.username),
+  }).sort((a, b) =>
+    a.end.getTime() - b.end.getTime(),
   );
+
+  console.log(formattedPlayers)
 
   if (!formattedPlayers.length) {
     return <div className='mx-auto text-gray-500'>No players yet</div>
