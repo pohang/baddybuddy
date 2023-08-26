@@ -6,6 +6,7 @@ import * as React from 'react';
 import { UrgencyColors, getExpiringUrgency } from '~/utils/time';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { pillStyles } from './OurCourtsList';
 
 type Props = {
   playerQuery: UseTRPCQueryResult<
@@ -54,7 +55,7 @@ const PlayerList = (props: Props) => {
     const signups = signupStateQuery.data?.signupsByCourt?.get(court) || [];
     let minutesLeft;
     if (signups.length === 0) {
-      minutesLeft = '';
+      minutesLeft = undefined;
     } else if (signups[0]!.endsAt == null) {
       minutesLeft = 'reserved';
     } else {
@@ -65,10 +66,10 @@ const PlayerList = (props: Props) => {
     const urgency = typeof minutesLeft === 'number' ? getExpiringUrgency(minutesLeft) : undefined;
     const color = urgency ? UrgencyColors[urgency] : 'gray';
 
-    const minutesLeftLabel = typeof minutesLeft === 'number' ? `${minutesLeft}m` : minutesLeft === undefined ? 'n/a' : minutesLeft;
+    const minutesLeftLabel = typeof minutesLeft === 'number' ? `${minutesLeft}m` : minutesLeft == null ? 'n/a' : minutesLeft;
     return (
       <div className="flex flex-col text-xs">
-        <div className="flex gap-1"><span className='font-bold'>Court {court}</span> <div style={{ color }}><FontAwesomeIcon icon={faClock}></FontAwesomeIcon>&nbsp;{minutesLeftLabel}</div>
+        <div className="flex gap-1"><span className='font-bold'>Court {court}</span> <div style={{ ...pillStyles, color, borderColor: color, paddingLeft: 4 }}><FontAwesomeIcon icon={faClock}></FontAwesomeIcon>&nbsp;{minutesLeftLabel}</div>
         </div>
         <div>
           {signups.map((signup, signupI) => {

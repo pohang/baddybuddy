@@ -26,7 +26,7 @@ type Props = {
   >;
 };
 
-const pillStyles: React.CSSProperties = { whiteSpace: 'nowrap', borderRadius: 32, padding: '0 6px', backgroundColor: 'ghostwhite', border: '1px solid lightgray', minWidth: 'fit-content' }
+export const pillStyles: React.CSSProperties = { whiteSpace: 'nowrap', borderRadius: 32, padding: '0 6px', backgroundColor: 'ghostwhite', border: '1px solid lightgray', minWidth: 'fit-content' }
 const ourPlayerPillStyles: React.CSSProperties = { ...pillStyles, color: 'seagreen', backgroundColor: '#e3fae6', border: '1px solid green' }
 
 const OurCourtsList = (props: Props) => {
