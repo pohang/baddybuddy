@@ -31,11 +31,11 @@ const ShowAllPlayersDialog = (props: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Show All</Button>
+        <Button>Show all</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>All Players</DialogTitle>
+          <DialogTitle>All players</DialogTitle>
         </DialogHeader>
         <PlayerList {...props} />
         <DialogFooter>

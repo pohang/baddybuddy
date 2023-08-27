@@ -1,7 +1,6 @@
 import { Storage } from '@google-cloud/storage';
 import { GOOGLE } from '~/server/lib/credentials/google';
 
-const bucketName = 'baddybuddy-court-signups';
 const storageClient = new Storage({
   projectId: GOOGLE.projectId,
   credentials: GOOGLE.credentials,
@@ -10,7 +9,7 @@ const storageClient = new Storage({
 export default class ImageStorage {
   async getPresignedUrlForUpload(fileName: string) {
     const [url] = await storageClient
-      .bucket(bucketName)
+      .bucket(GOOGLE.bucketName)
       .file(fileName)
       .getSignedUrl({
         version: 'v4',
@@ -22,7 +21,7 @@ export default class ImageStorage {
 
   async getPresignedUrlForDownload(fileName: string) {
     const [url] = await storageClient
-      .bucket(bucketName)
+      .bucket(GOOGLE.bucketName)
       .file(fileName)
       .getSignedUrl({
         version: 'v4',
@@ -36,7 +35,7 @@ export default class ImageStorage {
   async getHash(fileName: string) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const [metadata] = await storageClient
-      .bucket(bucketName)
+      .bucket(GOOGLE.bucketName)
       .file(fileName)
       .getMetadata();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

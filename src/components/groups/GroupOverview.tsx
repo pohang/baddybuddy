@@ -1,8 +1,6 @@
 import AddPlayerDialog from '~/components/groups/AddPlayerDialog';
 import ImageUploadDialog from '~/components/groups/ImageUploadDialog';
-import NeedsSignupList from '~/components/groups/NeedsSignupList';
 import OurCourtsList from '~/components/groups/OurCourtsList';
-import ShowAllPlayersDialog from '~/components/groups/ShowAllPlayersDialog';
 import SignupTable from '~/components/groups/SignupTable';
 import { Button } from '~/components/ui/button';
 import { useToast } from '~/components/ui/use-toast';
@@ -10,6 +8,9 @@ import { api } from '~/utils/api';
 import { formatTime } from '~/utils/time';
 import { useRouter } from 'next/router';
 import * as React from 'react';
+import PlayerList from './PlayerList';
+import { faClone } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Props = {
   groupId: string;
@@ -18,6 +19,10 @@ type Props = {
 const GroupOverview = (props: Props) => {
   const router = useRouter();
   const { groupId } = props;
+
+  // todo: later
+  // const [onlyShowUnsigned, setOnlyShowUnsigned] = useLocalStorage('onlyShowUnsignedPlayers', false);
+
   const groupQuery = api.groups.getGroup.useQuery(
     { groupId },
     {
@@ -69,50 +74,41 @@ const GroupOverview = (props: Props) => {
   return (
     <div className="flex flex-col items-stretch justify-center gap-4">
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-4 mx-auto justify-center">
-          <div className="flex flex-col">
-            <h1 className="text-4xl">{groupId}</h1>
-            <p className="mx-auto">
-              {groupQuery.data.createdAt.toLocaleDateString()}
-            </p>
-          </div>
-          <Button onClick={handleCopyLink}>Copy link</Button>
-        </div>
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <p>{playerQuery.data?.length} players</p>
-        </div>
-        <div className="flex gap-2">
-          <ShowAllPlayersDialog
-            groupId={groupId}
-            playerQuery={playerQuery}
-            signupStateQuery={signupStateQuery}
-          />
+        <div className="flex items-center gap-4 justify-between">
           <AddPlayerDialog
             groupId={groupId}
+            playerCount={playerQuery.data?.length || 0}
             onPlayerAdd={playerQuery.refetch}
           />
+          <div className="flex flex-col">
+            <h1 className="text-4xl">{groupId}</h1>
+          </div>
+          <Button variant='outline' onClick={handleCopyLink}><FontAwesomeIcon icon={faClone} /></Button>
         </div>
       </div>
+      {/* <div className="flex items-center justify-between">
+        <Button onClick={() => setOnlyShowUnsigned(!onlyShowUnsigned)}>
+          {onlyShowUnsigned ? 'All users' : 'Hide signed'}
+        </Button>
+      </div> */}
       <div className="flex flex-col">
-        <h2 className="text-2xl">Needs signup</h2>
-        <NeedsSignupList
+        <PlayerList
+          groupId={groupId}
           playerQuery={playerQuery}
           signupStateQuery={signupStateQuery}
         />
       </div>
       <div className="flex flex-col">
-        <h2 className="text-2xl">Our courts</h2>
+        <h2 className="text-2xl">Our slots</h2>
         <OurCourtsList
           playerQuery={playerQuery}
           signupStateQuery={signupStateQuery}
         />
       </div>
       <div>
-        <div className="flex flex-col items-stretch justify-center gap-12">
+        <div className="flex flex-col items-stretch justify-center gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl">All Courts</h2>
+            <h2 className="text-2xl">All courts</h2>
             <div className="flex items-center gap-2">
               <ImageUploadDialog
                 groupId={groupId}
@@ -131,7 +127,7 @@ const GroupOverview = (props: Props) => {
               <img src={signupStateQuery.data?.imageUri} alt="signup state" />
               {signupStateQuery.data?.takenAt ? (
                 <p>
-                  Picture taken at {formatTime(signupStateQuery.data?.takenAt)}
+                  Uploaded at {formatTime(signupStateQuery.data?.takenAt)}
                 </p>
               ) : null}
               <Button

@@ -61,6 +61,7 @@ const ImageUploadDialog = (props: Props) => {
       success = true;
     } catch (err) {
       if (err instanceof Error) {
+        console.log('Upload error', err);
         setError(err.message);
       } else {
         setError('Unexpected error occurred.');

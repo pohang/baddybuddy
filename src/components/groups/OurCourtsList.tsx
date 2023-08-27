@@ -10,8 +10,10 @@ import {
   TableRow,
 } from '~/components/ui/table';
 import { type AppRouter } from '~/server/api/root';
-import { formatTime } from '~/utils/time';
+import { getMinRemaining } from '~/utils/time';
 import * as React from 'react';
+import _ from 'lodash';
+import { PasswordEmojis } from '~/utils/emoji';
 
 type Props = {
   playerQuery: UseTRPCQueryResult<
@@ -23,6 +25,9 @@ type Props = {
     TRPCClientErrorLike<AppRouter>
   >;
 };
+
+export const pillStyles: React.CSSProperties = { whiteSpace: 'nowrap', borderRadius: 32, padding: '0 6px', backgroundColor: 'ghostwhite', border: '1px solid lightgray', minWidth: 'fit-content' }
+const ourPlayerPillStyles: React.CSSProperties = { ...pillStyles, color: 'seagreen', backgroundColor: '#e3fae6', border: '1px solid green' }
 
 const OurCourtsList = (props: Props) => {
   const { playerQuery, signupStateQuery } = props;
@@ -54,37 +59,37 @@ const OurCourtsList = (props: Props) => {
   }
 
   // Find signups that contain a name that's part of our group.
-  const playerNames = new Set<string>(
-    playerQuery.data.map((player) => player.username),
-  );
+  const playerData = _.keyBy(playerQuery.data.map(player => ({ username: player.username, password: player.password })), 'username')
   const ourSignups: {
     court: string;
     players: string[];
     onCourt: boolean;
     sortIndex: number;
+    minsRemaining: number;
   }[] = [];
   signupStateQuery.data?.signupsByCourt.forEach((signups, court) => {
     signups.forEach((signup) => {
-      if (signup.players.some((player) => playerNames.has(player))) {
-        let status;
+      if (signup.players.some((player) => player in playerData)) {
         let sortIndex;
         let onCourt = false;
+        let minsRemaining = -1;
+
         if (signup.startsAt === null) {
-          status = 'after res';
           sortIndex = Number.MAX_SAFE_INTEGER;
-        } else if (signup.startsAt < new Date()) {
-          status = `until ${formatTime(signup.endsAt!)}`;
+        } else if (signup.startsAt < new Date() && signup.endsAt) {
           sortIndex = signup.startsAt.getTime();
           onCourt = true;
+          minsRemaining = getMinRemaining(signup.endsAt);
         } else {
-          status = `at ${formatTime(signup.startsAt)}`;
+          minsRemaining = getMinRemaining(signup.startsAt);
           sortIndex = signup.startsAt.getTime();
         }
         ourSignups.push({
-          court: `${court} ${status}`,
+          court: `${court}`,
           players: signup.players,
           onCourt,
           sortIndex,
+          minsRemaining,
         });
       }
     });
@@ -94,41 +99,47 @@ const OurCourtsList = (props: Props) => {
 
   const formatPlayers = (players: string[]) => {
     return (
-      <div className="grid grid-cols-2 gap-1">
+      <div className='flex gap-px'>
         {players.map((player, i) => {
-          if (playerNames.has(player)) {
+          if (player in playerData) {
             return (
-              <div key={i} className="text-green-300">
-                {player}
+              <div key={i} style={ourPlayerPillStyles}>
+                {`${player} ${PasswordEmojis[playerData[player]!.password] ?? ''}`}
               </div>
             );
           }
-          return <div key={i}>{player}</div>;
+          return <div style={pillStyles} key={i}>{player}</div>;
         })}
       </div>
     );
   };
 
+  if (!ourSignups.length) {
+    return <div className='mx-auto text-gray-500'>No slots yet</div>
+  }
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="p-2">Court</TableHead>
-          <TableHead className="p-2">Players</TableHead>
+          <TableHead className="p-1">Court</TableHead>
+          <TableHead className="p-1">Time</TableHead>
+          <TableHead className="p-1">Players</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {ourSignups.map((signup, i) => (
           <TableRow key={i}>
-            {signup.onCourt ? (
-              <TableCell className="p-2 text-green-300">
-                {signup.court}
-              </TableCell>
-            ) : (
-              <TableCell className="p-2">{signup.court}</TableCell>
-            )}
 
-            <TableCell className="py-2">
+            <TableCell className="p-1 py-2">
+              {signup.court}
+            </TableCell>
+
+            <TableCell className="p-1 text-green-600" style={{ whiteSpace: 'nowrap' }}>
+              {signup.onCourt ? `${signup.minsRemaining}m` : `in ${signup.minsRemaining}m`}
+            </TableCell>
+
+            <TableCell className="p-1">
               {formatPlayers(signup.players)}
             </TableCell>
           </TableRow>
