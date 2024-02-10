@@ -1,16 +1,25 @@
+import { faClone } from '@fortawesome/free-regular-svg-icons/faClone';
+import { faSquarePlus } from '@fortawesome/free-regular-svg-icons/faSquarePlus';
+import { faBars } from '@fortawesome/free-solid-svg-icons/faBars';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import AddPlayerDialog from '~/components/groups/AddPlayerDialog';
 import ImageUploadDialog from '~/components/groups/ImageUploadDialog';
 import OurCourtsList from '~/components/groups/OurCourtsList';
+import ReportIssueDialog from '~/components/groups/ReportIssueDialog';
 import SignupTable from '~/components/groups/SignupTable';
 import { Button } from '~/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu';
 import { useToast } from '~/components/ui/use-toast';
 import { api } from '~/utils/api';
 import { formatTime } from '~/utils/time';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import PlayerList from './PlayerList';
-import { faClone } from '@fortawesome/free-regular-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Props = {
   groupId: string;
@@ -19,9 +28,6 @@ type Props = {
 const GroupOverview = (props: Props) => {
   const router = useRouter();
   const { groupId } = props;
-
-  // todo: later
-  // const [onlyShowUnsigned, setOnlyShowUnsigned] = useLocalStorage('onlyShowUnsignedPlayers', false);
 
   const groupQuery = api.groups.getGroup.useQuery(
     { groupId },
@@ -43,6 +49,11 @@ const GroupOverview = (props: Props) => {
       enabled: !!groupId,
     },
   );
+  const createGroupMutation = api.groups.createGroup.useMutation({
+    onSuccess: async (data) => {
+      await router.push(`/groups/${data.id}`);
+    },
+  });
 
   const { toast } = useToast();
 
@@ -52,6 +63,10 @@ const GroupOverview = (props: Props) => {
       title: 'Copied link to clipboard.',
       description: 'Share it with your group!',
     });
+  };
+
+  const handleCreateNewGroup = () => {
+    createGroupMutation.mutate();
   };
 
   if (groupQuery.isLoading) {
@@ -83,14 +98,31 @@ const GroupOverview = (props: Props) => {
           <div className="flex flex-col">
             <h1 className="text-4xl">{groupId}</h1>
           </div>
-          <Button variant='outline' onClick={handleCopyLink}><FontAwesomeIcon icon={faClone} /></Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <FontAwesomeIcon icon={faBars} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={handleCopyLink}
+              >
+                <FontAwesomeIcon className="pr-2" icon={faClone} />
+                Copy link
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={handleCreateNewGroup}
+              >
+                <FontAwesomeIcon className="pr-2" icon={faSquarePlus} />
+                Create new group
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
-      {/* <div className="flex items-center justify-between">
-        <Button onClick={() => setOnlyShowUnsigned(!onlyShowUnsigned)}>
-          {onlyShowUnsigned ? 'All users' : 'Hide signed'}
-        </Button>
-      </div> */}
       <div className="flex flex-col">
         <PlayerList
           groupId={groupId}
@@ -126,19 +158,21 @@ const GroupOverview = (props: Props) => {
             <div className="flex flex-col items-center justify-center gap-4">
               <img src={signupStateQuery.data?.imageUri} alt="signup state" />
               {signupStateQuery.data?.takenAt ? (
-                <p>
-                  Uploaded at {formatTime(signupStateQuery.data?.takenAt)}
-                </p>
+                <p>Uploaded at {formatTime(signupStateQuery.data?.takenAt)}</p>
               ) : null}
-              <Button
-                onClick={async () => {
-                  await router.push(
-                    `/debug?fileName=${signupStateQuery.data?.fileName || ''}`,
-                  );
-                }}
-              >
-                Debug
-              </Button>
+              <div className="flex flex-row gap-4">
+                <ReportIssueDialog
+                  groupId={groupId}
+                  trigger={<Button>Report issue</Button>}
+                />
+                <Button
+                  onClick={async () => {
+                    await router.push(`/debug?groupId=${groupId}`);
+                  }}
+                >
+                  Debug
+                </Button>
+              </div>
             </div>
           ) : null}
         </div>

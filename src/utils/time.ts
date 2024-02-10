@@ -1,9 +1,9 @@
 const rtf = new Intl.RelativeTimeFormat('en-US', {
   numeric: 'auto',
-  style: 'short'
+  style: 'short',
 });
 
-export const formatTime = (time: Date, now?: Date) => {
+export const formatTime = (time: Date, now?: Date | null) => {
   const nowDate = now || new Date();
   const deltaSeconds = Math.round((time.getTime() - nowDate.getTime()) / 1000);
   const relative = rtf.format(Math.ceil(deltaSeconds / 60), 'minute');
@@ -32,12 +32,15 @@ export const getExpiringUrgency = (mins: number): UrgencyStatus => {
   } else if (mins <= 6) {
     return 'soon';
   } else {
-    return 'normal'
+    return 'normal';
   }
-}
+};
 
-export const UrgencyColors: Record<UrgencyStatus, React.CSSProperties['color']> = {
+export const UrgencyColors: Record<
+  UrgencyStatus,
+  React.CSSProperties['color']
+> = {
   urgent: 'red',
   soon: 'goldenrod',
-  normal: 'green'
-}
+  normal: 'green',
+};

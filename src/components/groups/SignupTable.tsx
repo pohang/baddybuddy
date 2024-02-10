@@ -1,11 +1,11 @@
+import { faClock } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { type TRPCClientErrorLike } from '@trpc/client';
 import { type UseTRPCQueryResult } from '@trpc/react-query/shared';
 import { type inferRouterOutputs } from '@trpc/server';
 import { type AppRouter } from '~/server/api/root';
+import { getExpiringUrgency, UrgencyColors } from '~/utils/time';
 import * as React from 'react';
-import { UrgencyColors, getExpiringUrgency } from '~/utils/time';
-import { faClock } from '@fortawesome/free-regular-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { pillStyles } from './OurCourtsList';
 
 type Props = {
@@ -17,10 +17,12 @@ type Props = {
     inferRouterOutputs<AppRouter>['signups']['getSignupState'],
     TRPCClientErrorLike<AppRouter>
   >;
+  timeOverride?: Date | null;
 };
 
 const PlayerList = (props: Props) => {
-  const { playerQuery, signupStateQuery } = props;
+  const { playerQuery, signupStateQuery, timeOverride } = props;
+  const now = timeOverride || new Date();
 
   if (playerQuery.isLoading || signupStateQuery.isLoading) {
     return (
@@ -60,16 +62,31 @@ const PlayerList = (props: Props) => {
       minutesLeft = 'reserved';
     } else {
       const endsAt = signups[0]!.endsAt;
-      minutesLeft = Math.ceil((endsAt.getTime() - Date.now()) / 1000 / 60);
+      minutesLeft = Math.ceil((endsAt.getTime() - now.getTime()) / 1000 / 60);
     }
 
-    const urgency = typeof minutesLeft === 'number' ? getExpiringUrgency(minutesLeft) : undefined;
+    const urgency =
+      typeof minutesLeft === 'number'
+        ? getExpiringUrgency(minutesLeft)
+        : undefined;
     const color = urgency ? UrgencyColors[urgency] : 'gray';
 
-    const minutesLeftLabel = typeof minutesLeft === 'number' ? `${minutesLeft}m` : minutesLeft == null ? 'n/a' : minutesLeft;
+    const minutesLeftLabel =
+      typeof minutesLeft === 'number'
+        ? `${minutesLeft}m`
+        : minutesLeft == null
+        ? 'n/a'
+        : minutesLeft;
     return (
       <div className="flex flex-col text-xs">
-        <div className="flex gap-1"><span className='font-bold'>Court {court}</span> <div style={{ ...pillStyles, color, borderColor: color, paddingLeft: 4 }}><FontAwesomeIcon icon={faClock}></FontAwesomeIcon>&nbsp;{minutesLeftLabel}</div>
+        <div className="flex gap-1">
+          <span className="font-bold">Court {court}</span>{' '}
+          <div
+            style={{ ...pillStyles, color, borderColor: color, paddingLeft: 4 }}
+          >
+            <FontAwesomeIcon icon={faClock}></FontAwesomeIcon>&nbsp;
+            {minutesLeftLabel}
+          </div>
         </div>
         <div>
           {signups.map((signup, signupI) => {
