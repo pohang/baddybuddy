@@ -1,4 +1,5 @@
 import { groupRouter } from '~/server/api/routers/group';
+import { issueRouter } from '~/server/api/routers/issue';
 import { playerRouter } from '~/server/api/routers/player';
 import { signupRouter } from '~/server/api/routers/signup';
 import { createTRPCRouter } from '~/server/api/trpc';
@@ -12,6 +13,7 @@ export const appRouter = createTRPCRouter({
   groups: groupRouter,
   players: playerRouter,
   signups: signupRouter,
+  issues: issueRouter,
 });
 
 // export type definition of API

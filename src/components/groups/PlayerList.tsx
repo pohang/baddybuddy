@@ -14,7 +14,6 @@ import { type AppRouter } from '~/server/api/root';
 import { getMinRemaining } from '~/utils/time';
 import * as React from 'react';
 
-
 type Props = {
   groupId: string;
   playerQuery: UseTRPCQueryResult<
@@ -25,10 +24,12 @@ type Props = {
     inferRouterOutputs<AppRouter>['signups']['getSignupState'],
     TRPCClientErrorLike<AppRouter>
   >;
+  timeOverride?: Date | null;
 };
 
 const PlayerList = (props: Props) => {
-  const { groupId, playerQuery, signupStateQuery } = props;
+  const { groupId, playerQuery, signupStateQuery, timeOverride } = props;
+  const now = timeOverride || new Date();
 
   if (playerQuery.isLoading || signupStateQuery.isLoading) {
     return (
@@ -76,67 +77,70 @@ const PlayerList = (props: Props) => {
     });
   });
 
-  const formattedPlayers = players.map((p) => {
-    const signup = playerStatus.get(p.username.toLowerCase());
-    let status;
-    let end = new Date(0);
+  const formattedPlayers = players
+    .map((p) => {
+      const signup = playerStatus.get(p.username.toLowerCase());
+      let status;
+      let end = new Date(0);
 
-    if (signup == null) {
-      status = '🚫';
-    } else {
-      const { startsAt, endsAt, court } = signup;
-      if (endsAt) {
-        end = endsAt;
-      }
-      if (startsAt == null) {
-        status = `${court} (after res)`;
-      } else if (startsAt < new Date() && endsAt) {
-        status = `${court} (${getMinRemaining(endsAt)}m left)`;
+      if (signup == null) {
+        status = '🚫';
       } else {
-        status = `${court} in ${getMinRemaining(startsAt)}m`;
+        const { startsAt, endsAt, court } = signup;
+        if (endsAt) {
+          end = endsAt;
+        }
+        if (startsAt == null) {
+          status = `${court} (after res)`;
+        } else if (startsAt < now && endsAt) {
+          status = `${court} (${getMinRemaining(endsAt, now)}m left)`;
+        } else {
+          status = `${court} in ${getMinRemaining(startsAt, now)}m`;
+        }
       }
-    }
 
-    return {
-      username: p.username,
-      password: p.password,
-      status,
-      end
-    };
-  }).sort((a, b) =>
-    a.end.getTime() - b.end.getTime(),
-  );
+      return {
+        username: p.username,
+        password: p.password,
+        status,
+        end,
+      };
+    })
+    .sort((a, b) => a.end.getTime() - b.end.getTime());
 
-  console.log(formattedPlayers)
+  console.log(formattedPlayers);
 
   if (!formattedPlayers.length) {
-    return <div className='mx-auto text-gray-500'>No players yet</div>
+    return <div className="mx-auto text-gray-500">No players yet</div>;
   }
 
   return (
     <Table className="overflow-y-scroll max-h-96 table-auto">
       <TableHeader>
         <TableRow>
-          <TableHead className='p-1'></TableHead>
-          <TableHead className='p-1'>User</TableHead>
-          <TableHead className='p-1'>Animal</TableHead>
-          <TableHead className='p-1'>Court</TableHead>
+          <TableHead className="p-1"></TableHead>
+          <TableHead className="p-1">User</TableHead>
+          <TableHead className="p-1">Animal</TableHead>
+          <TableHead className="p-1">Court</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {formattedPlayers.map((player) => (
           <TableRow key={player.username}>
-            <TableCell className='p-0'>
+            <TableCell className="p-0">
               <RemovePlayerDialog
                 groupId={groupId}
                 username={player.username}
                 onPlayerRemove={playerQuery.refetch}
               />
             </TableCell>
-            <TableCell className='p-1'><div style={{ overflowWrap: 'anywhere' }}>{player.username}</div></TableCell>
-            <TableCell className='p-1' style={{ whiteSpace: 'nowrap' }}>{player.password}</TableCell>
-            <TableCell className='p-1'>{player.status}</TableCell>
-
+            <TableCell className="p-1">
+              <div style={{ overflowWrap: 'anywhere' }}>{player.username}</div>
+            </TableCell>
+            <TableCell className="p-1" style={{ whiteSpace: 'nowrap' }}>
+              {player.password}
+            </TableCell>
+            <TableCell className="p-1">{player.status}</TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -72,13 +72,16 @@ export const signupRouter = createTRPCRouter({
     }),
 
   getSignupState: publicProcedure
-    .input(z.object({ groupId: z.string() }))
+    .input(z.object({ groupId: z.string(), currentTime: z.optional(z.date()) }))
     .query(async ({ ctx, input }) => {
-      const { groupId } = input;
+      const { groupId, currentTime = new Date() } = input;
       const signupState = await ctx.prisma.signupState.findFirst({
         where: {
           groupId,
           active: true,
+          createdAt: {
+            lte: currentTime,
+          },
         },
         orderBy: {
           createdAt: Prisma.SortOrder.desc,
@@ -112,7 +115,7 @@ export const signupRouter = createTRPCRouter({
         };
       });
       courtSignups.forEach((signup) => {
-        if (signup.endsAt && signup.endsAt < new Date()) {
+        if (signup.endsAt && signup.endsAt < currentTime) {
           return;
         }
 

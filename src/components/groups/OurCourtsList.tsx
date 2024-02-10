@@ -10,10 +10,10 @@ import {
   TableRow,
 } from '~/components/ui/table';
 import { type AppRouter } from '~/server/api/root';
-import { getMinRemaining } from '~/utils/time';
-import * as React from 'react';
-import _ from 'lodash';
 import { PasswordEmojis } from '~/utils/emoji';
+import { getMinRemaining } from '~/utils/time';
+import _ from 'lodash';
+import * as React from 'react';
 
 type Props = {
   playerQuery: UseTRPCQueryResult<
@@ -24,13 +24,27 @@ type Props = {
     inferRouterOutputs<AppRouter>['signups']['getSignupState'],
     TRPCClientErrorLike<AppRouter>
   >;
+  timeOverride?: Date | null;
 };
 
-export const pillStyles: React.CSSProperties = { whiteSpace: 'nowrap', borderRadius: 32, padding: '0 6px', backgroundColor: 'ghostwhite', border: '1px solid lightgray', minWidth: 'fit-content' }
-const ourPlayerPillStyles: React.CSSProperties = { ...pillStyles, color: 'seagreen', backgroundColor: '#e3fae6', border: '1px solid green' }
+export const pillStyles: React.CSSProperties = {
+  whiteSpace: 'nowrap',
+  borderRadius: 32,
+  padding: '0 6px',
+  backgroundColor: 'ghostwhite',
+  border: '1px solid lightgray',
+  minWidth: 'fit-content',
+};
+const ourPlayerPillStyles: React.CSSProperties = {
+  ...pillStyles,
+  color: 'seagreen',
+  backgroundColor: '#e3fae6',
+  border: '1px solid green',
+};
 
 const OurCourtsList = (props: Props) => {
-  const { playerQuery, signupStateQuery } = props;
+  const { playerQuery, signupStateQuery, timeOverride } = props;
+  const now = timeOverride || new Date();
 
   if (playerQuery.isLoading || signupStateQuery.isLoading) {
     return (
@@ -59,7 +73,13 @@ const OurCourtsList = (props: Props) => {
   }
 
   // Find signups that contain a name that's part of our group.
-  const playerData = _.keyBy(playerQuery.data.map(player => ({ username: player.username, password: player.password })), 'username')
+  const playerData = _.keyBy(
+    playerQuery.data.map((player) => ({
+      username: player.username,
+      password: player.password,
+    })),
+    'username',
+  );
   const ourSignups: {
     court: string;
     players: string[];
@@ -76,12 +96,12 @@ const OurCourtsList = (props: Props) => {
 
         if (signup.startsAt === null) {
           sortIndex = Number.MAX_SAFE_INTEGER;
-        } else if (signup.startsAt < new Date() && signup.endsAt) {
+        } else if (signup.startsAt < now && signup.endsAt) {
           sortIndex = signup.startsAt.getTime();
           onCourt = true;
-          minsRemaining = getMinRemaining(signup.endsAt);
+          minsRemaining = getMinRemaining(signup.endsAt, now);
         } else {
-          minsRemaining = getMinRemaining(signup.startsAt);
+          minsRemaining = getMinRemaining(signup.startsAt, now);
           sortIndex = signup.startsAt.getTime();
         }
         ourSignups.push({
@@ -99,23 +119,29 @@ const OurCourtsList = (props: Props) => {
 
   const formatPlayers = (players: string[]) => {
     return (
-      <div className='flex gap-px'>
+      <div className="flex gap-px">
         {players.map((player, i) => {
           if (player in playerData) {
             return (
               <div key={i} style={ourPlayerPillStyles}>
-                {`${player} ${PasswordEmojis[playerData[player]!.password] ?? ''}`}
+                {`${player} ${
+                  PasswordEmojis[playerData[player]!.password] ?? ''
+                }`}
               </div>
             );
           }
-          return <div style={pillStyles} key={i}>{player}</div>;
+          return (
+            <div style={pillStyles} key={i}>
+              {player}
+            </div>
+          );
         })}
       </div>
     );
   };
 
   if (!ourSignups.length) {
-    return <div className='mx-auto text-gray-500'>No slots yet</div>
+    return <div className="mx-auto text-gray-500">No slots yet</div>;
   }
 
   return (
@@ -130,13 +156,14 @@ const OurCourtsList = (props: Props) => {
       <TableBody>
         {ourSignups.map((signup, i) => (
           <TableRow key={i}>
-
-            <TableCell className="p-1 py-2">
-              {signup.court}
-            </TableCell>
-
-            <TableCell className="p-1 text-green-600" style={{ whiteSpace: 'nowrap' }}>
-              {signup.onCourt ? `${signup.minsRemaining}m` : `in ${signup.minsRemaining}m`}
+            <TableCell className="p-1 py-2">{signup.court}</TableCell>
+            <TableCell
+              className="p-1 text-green-600"
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {signup.onCourt
+                ? `${signup.minsRemaining}m`
+                : `in ${signup.minsRemaining}m`}
             </TableCell>
 
             <TableCell className="p-1">

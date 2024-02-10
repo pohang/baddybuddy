@@ -9,7 +9,9 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     NODE_ENV: z.enum(['development', 'test', 'production']),
-    GOOGLE_CREDENTIALS: z.string()
+    GOOGLE_CREDENTIALS: z.string(),
+    BUCKET_NAME: z.string(),
+    GITHUB_TOKEN: z.string(),
   },
 
   /**
@@ -28,7 +30,9 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    GOOGLE_CREDENTIALS: process.env.GOOGLE_CREDENTIALS
+    GOOGLE_CREDENTIALS: process.env.GOOGLE_CREDENTIALS,
+    BUCKET_NAME: process.env.BUCKET_NAME,
+    GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

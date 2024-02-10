@@ -1,8 +1,13 @@
 import { type TRPCClientErrorLike } from '@trpc/client';
 import { type UseTRPCQueryResult } from '@trpc/react-query/shared';
 import { type inferRouterOutputs } from '@trpc/server';
+import OurCourtsList from '~/components/groups/OurCourtsList';
+import PlayerList from '~/components/groups/PlayerList';
+import SignupTable from '~/components/groups/SignupTable';
+import { Input } from '~/components/ui/input';
 import { type AppRouter } from '~/server/api/root';
 import { api } from '~/utils/api';
+import { formatTime } from '~/utils/time';
 import Head from 'next/head';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
@@ -100,21 +105,44 @@ const Canvas = (props: DebugData) => {
 
 export default function Debug() {
   const searchParams = useSearchParams();
-  const fileName = searchParams.get('fileName') || '';
+  const groupId = searchParams.get('groupId') || '';
   const [imageDimensions, setImageDimensions] = React.useState<{
     height: number;
     width: number;
   } | null>(null);
+  const [timeOverrideValue, setTimeOverrideValue] = React.useState('');
+  const [timeOverride, setTimeOverride] = React.useState<Date | null>(null);
+
+  const groupQuery = api.groups.getGroup.useQuery({ groupId });
+  const playerQuery = api.players.getPlayers.useQuery({ groupId });
+  const signupStateQuery = api.signups.getSignupState.useQuery({
+    groupId,
+    currentTime: timeOverride ?? undefined,
+  });
+
   const debugSignupStateImageQuery = api.signups.debugSignupStateImage.useQuery(
     {
-      fileName,
+      fileName: signupStateQuery?.data?.fileName || '',
     },
     {
+      enabled: !!signupStateQuery?.data?.fileName,
       onSuccess: (data) => {
         loadImage(setImageDimensions, data.imageUri);
       },
     },
   );
+
+  const handleTimeOverrideChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTimeOverrideValue(e.target.value);
+    const parsed = Date.parse(e.target.value);
+    if (!isNaN(parsed)) {
+      setTimeOverride(new Date(parsed));
+    }
+
+    if (e.target.value.length === 0) {
+      setTimeOverride(null);
+    }
+  };
 
   const renderContent = () => {
     if (debugSignupStateImageQuery.isLoading || imageDimensions == null) {
@@ -129,12 +157,26 @@ export default function Debug() {
     }
 
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-4">
+        <div className="flex">
+          <Input
+            type="text"
+            placeholder="Time override: 2024-01-01 10:00:00"
+            onChange={handleTimeOverrideChange}
+            value={timeOverrideValue}
+          />
+        </div>
         <Canvas
           width={imageDimensions.width}
           height={imageDimensions.height}
           debugSignupStateImageQuery={debugSignupStateImageQuery}
         />
+        {signupStateQuery.data?.takenAt ? (
+          <p>
+            Uploaded at{' '}
+            {formatTime(signupStateQuery.data?.takenAt, timeOverride)}
+          </p>
+        ) : null}
         {debugSignupStateImageQuery.data.courtDebugInfo.map((info, i) => {
           return (
             <div key={i}>
@@ -145,6 +187,24 @@ export default function Debug() {
             </div>
           );
         })}
+        <PlayerList
+          groupId={groupId}
+          playerQuery={playerQuery}
+          signupStateQuery={signupStateQuery}
+          timeOverride={timeOverride}
+        />
+        <OurCourtsList
+          playerQuery={playerQuery}
+          signupStateQuery={signupStateQuery}
+          timeOverride={timeOverride}
+        />
+        {signupStateQuery.data ? (
+          <SignupTable
+            playerQuery={playerQuery}
+            signupStateQuery={signupStateQuery}
+            timeOverride={timeOverride}
+          />
+        ) : null}
         {JSON.stringify(debugSignupStateImageQuery.data.courtSignups)}
       </div>
     );
