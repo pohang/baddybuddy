@@ -143,4 +143,21 @@ export const signupRouter = createTRPCRouter({
         imageUri,
       };
     }),
+
+  getUploadTimes: publicProcedure
+    .input(z.object({ groupId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { groupId } = input;
+      const signupStates = await ctx.prisma.signupState.findMany({
+        where: {
+          groupId,
+        },
+        orderBy: {
+          createdAt: Prisma.SortOrder.desc,
+        },
+      });
+      return {
+        uploadTimes: signupStates.map((s) => s.takenAt),
+      };
+    }),
 });

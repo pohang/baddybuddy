@@ -113,7 +113,7 @@ export default function Debug() {
   const [timeOverrideValue, setTimeOverrideValue] = React.useState('');
   const [timeOverride, setTimeOverride] = React.useState<Date | null>(null);
 
-  const groupQuery = api.groups.getGroup.useQuery({ groupId });
+  const uploadTimesQuery = api.signups.getUploadTimes.useQuery({ groupId });
   const playerQuery = api.players.getPlayers.useQuery({ groupId });
   const signupStateQuery = api.signups.getSignupState.useQuery({
     groupId,
@@ -126,16 +126,20 @@ export default function Debug() {
     },
     {
       enabled: !!signupStateQuery?.data?.fileName,
-      onSuccess: (data) => {
-        loadImage(setImageDimensions, data.imageUri);
-      },
     },
   );
+
+  React.useEffect(() => {
+    if (debugSignupStateImageQuery.data?.imageUri) {
+      loadImage(setImageDimensions, debugSignupStateImageQuery.data?.imageUri);
+    }
+  }, [debugSignupStateImageQuery]);
 
   const handleTimeOverrideChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTimeOverrideValue(e.target.value);
     const parsed = Date.parse(e.target.value);
-    if (!isNaN(parsed)) {
+    // must be valid timestamp and past 2024
+    if (!isNaN(parsed) && parsed >= 1704067200000) {
       setTimeOverride(new Date(parsed));
     }
 
@@ -145,9 +149,6 @@ export default function Debug() {
   };
 
   const renderContent = () => {
-    if (debugSignupStateImageQuery.isLoading || imageDimensions == null) {
-      return <div>Loading...</div>;
-    }
     if (debugSignupStateImageQuery.isError) {
       return (
         <div>
@@ -166,27 +167,31 @@ export default function Debug() {
             value={timeOverrideValue}
           />
         </div>
-        <Canvas
-          width={imageDimensions.width}
-          height={imageDimensions.height}
-          debugSignupStateImageQuery={debugSignupStateImageQuery}
-        />
-        {signupStateQuery.data?.takenAt ? (
-          <p>
-            Uploaded at{' '}
-            {formatTime(signupStateQuery.data?.takenAt, timeOverride)}
-          </p>
+        {imageDimensions ? (
+          <>
+            <Canvas
+              width={imageDimensions.width}
+              height={imageDimensions.height}
+              debugSignupStateImageQuery={debugSignupStateImageQuery}
+            />
+            {signupStateQuery.data?.takenAt ? (
+              <p>
+                Uploaded at{' '}
+                {formatTime(signupStateQuery.data?.takenAt, timeOverride)}
+              </p>
+            ) : null}
+            {debugSignupStateImageQuery.data?.courtDebugInfo.map((info, i) => {
+              return (
+                <div key={i}>
+                  <p>Court {info.court}</p>
+                  {info.lines.map((l, j) => {
+                    return <p key={j}>{JSON.stringify(l)}</p>;
+                  })}
+                </div>
+              );
+            })}
+          </>
         ) : null}
-        {debugSignupStateImageQuery.data.courtDebugInfo.map((info, i) => {
-          return (
-            <div key={i}>
-              <p>Court {info.court}</p>
-              {info.lines.map((l, j) => {
-                return <p key={j}>{JSON.stringify(l)}</p>;
-              })}
-            </div>
-          );
-        })}
         <PlayerList
           groupId={groupId}
           playerQuery={playerQuery}
@@ -205,14 +210,10 @@ export default function Debug() {
             timeOverride={timeOverride}
           />
         ) : null}
-        {JSON.stringify(debugSignupStateImageQuery.data.courtSignups)}
+        {JSON.stringify(debugSignupStateImageQuery.data?.courtSignups)}
       </div>
     );
   };
-
-  if (debugSignupStateImageQuery.isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <>
