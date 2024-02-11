@@ -229,7 +229,7 @@ const getNamesFromLine = (line: string[]): string[] => {
   return line
     .map((l) => cleanUsername(l))
     .filter((w) => {
-      return w.length > 0 && w !== 'current' && w !== 'players';
+      return w.length > 0 && w !== 'current' && !w.includes('player');
     });
 };
 
