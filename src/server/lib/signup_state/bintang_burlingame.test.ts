@@ -23,7 +23,7 @@ describe('processAnnotations', () => {
 });
 
 describe('cleanUsername', () => {
-  it('transliterates accented characters', async () => {
+  it('transliterates accented characters', () => {
     const cleaned = cleanUsername('davíyu');
     expect(cleaned).toEqual('daviyu');
   });
