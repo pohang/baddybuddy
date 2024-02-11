@@ -95,7 +95,23 @@ export const getRectangleForCourt = ({
       y: bottomLeft.y,
     };
   }
-  return { topLeft, topRight, bottomRight, bottomLeft };
+  const rect: Rectangle = { topLeft, topRight, bottomRight, bottomLeft };
+  return padRectangle(rect, 10, 10);
+};
+
+const padRectangle = (
+  vertices: Rectangle,
+  leftPadding: number,
+  topPadding: number,
+): Rectangle => {
+  const { topLeft, topRight, bottomRight, bottomLeft } = vertices;
+
+  return {
+    topLeft: { x: topLeft.x - leftPadding, y: topLeft.y - topPadding },
+    topRight: { x: topRight.x, y: topRight.y - topPadding },
+    bottomRight,
+    bottomLeft: { x: bottomLeft.x - leftPadding, y: bottomLeft.y },
+  };
 };
 
 export const groupAnnotationsAsLines = (

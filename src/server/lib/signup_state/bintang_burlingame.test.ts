@@ -1,5 +1,8 @@
 import { type google } from '@google-cloud/vision/build/protos/protos';
-import { processAnnotations } from '~/server/lib/signup_state/bintang_burlingame';
+import {
+  cleanUsername,
+  processAnnotations,
+} from '~/server/lib/signup_state/bintang_burlingame';
 import { formatSignups } from '~/server/lib/signup_state/court_signup';
 import bintang_burlingame_1 from '~/server/lib/signup_state/testdata/bintang_burlingame_1.json';
 import { describe, expect, it } from 'vitest';
@@ -16,5 +19,12 @@ describe('processAnnotations', () => {
     await expect(formatted).toMatchFileSnapshot(
       './testdata/bintang_burlingame_1.txt',
     );
+  });
+});
+
+describe('cleanUsername', () => {
+  it('transliterates accented characters', async () => {
+    const cleaned = cleanUsername('davíyu');
+    expect(cleaned).toEqual('daviyu');
   });
 });

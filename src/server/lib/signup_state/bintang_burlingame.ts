@@ -13,6 +13,7 @@ import {
   verticesAsGrid,
   type AnnotationWithRectangle,
 } from '~/server/lib/signup_state/utils';
+import { transliterate } from 'transliteration';
 
 const EXPECTED_NUM_GROUPS = 14;
 const COURT_SIGNUP_DURATION_MINUTES = 30;
@@ -113,7 +114,13 @@ export const processAnnotations = ({
         } else if (fullLine.includes('Reserved from')) {
           minutesLeftOrReserved = 'reserved';
           return;
-        } else if (fullLine.includes('Players') || linesSinceQueue >= 1) {
+        } else if (
+          // Looking for "Current Players" but sometimes it misreads playera or playere
+          fullLine.includes('Player') ||
+          fullLine.includes('Current') ||
+          // If we've seen Queue, we also want to start recording names.
+          linesSinceQueue >= 1
+        ) {
           const names = getNamesFromLine(line);
           const courtSignup = getCourtSignup({
             court,
@@ -186,7 +193,7 @@ const getCourtSignup = ({
   };
 };
 
-const cleanUsername = (username: string) => {
+export const cleanUsername = (username: string) => {
   if (/^[0-9]+$/.test(username)) {
     return '';
   }
@@ -204,7 +211,18 @@ const cleanUsername = (username: string) => {
     cleaned = cleaned.charAt(0) + cleaned.substring(1).replaceAll('I', 'l');
   }
 
+  cleaned = cleaned.toLowerCase();
+
+  // Sometimes, the Google Vision API will return letters with accents, such as í.
+  if (!isASCII(cleaned)) {
+    cleaned = transliterate(cleaned);
+  }
+
   return cleaned.toLowerCase();
+};
+
+const isASCII = (str: string) => {
+  return /^[\x00-\x7F]*$/.test(str);
 };
 
 const getNamesFromLine = (line: string[]): string[] => {
