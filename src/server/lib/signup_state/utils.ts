@@ -107,10 +107,13 @@ const padRectangle = (
   const { topLeft, topRight, bottomRight, bottomLeft } = vertices;
 
   return {
-    topLeft: { x: topLeft.x - leftPadding, y: topLeft.y - topPadding },
-    topRight: { x: topRight.x, y: topRight.y - topPadding },
+    topLeft: {
+      x: Math.max(0, topLeft.x - leftPadding),
+      y: Math.max(0, topLeft.y - topPadding),
+    },
+    topRight: { x: topRight.x, y: Math.max(0, topRight.y - topPadding) },
     bottomRight,
-    bottomLeft: { x: bottomLeft.x - leftPadding, y: bottomLeft.y },
+    bottomLeft: { x: Math.max(0, bottomLeft.x - leftPadding), y: bottomLeft.y },
   };
 };
 
