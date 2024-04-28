@@ -1,4 +1,5 @@
 import { Button } from '~/components/ui/button';
+import { useToast } from '~/components/ui/use-toast';
 import { api } from '~/utils/api';
 import { Loader2 } from 'lucide-react';
 import Head from 'next/head';
@@ -11,6 +12,15 @@ export default function Home() {
   const [createGroupError, setCreateGroupError] = React.useState<
     string | null
   >();
+  const { toast } = useToast();
+
+  const copyGroupIdLink = async () => {
+    await navigator.clipboard.writeText(window.location.toString());
+    toast({
+      title: 'Copied link to clipboard.',
+      description: 'Share it with your group!',
+    });
+  };
 
   const createGroupMutation = api.groups.createGroup.useMutation({
     onMutate: () => {
@@ -21,6 +31,7 @@ export default function Home() {
     onSuccess: async (data) => {
       console.log(`Created group ${data.id}, redirecting to group page.`);
       await router.push(`/groups/${data.id}`);
+      await copyGroupIdLink();
     },
     onError: (error) => {
       console.log(`Error while creating group: ${error.message}.`);
