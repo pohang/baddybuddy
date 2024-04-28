@@ -57,7 +57,7 @@ const GroupOverview = (props: Props) => {
 
   const { toast } = useToast();
 
-  const handleCopyLink = async () => {
+  const handleCopyLink = React.useCallback(async () => {
     const urlWithoutQueryParams = window.location.href.replace(
       window.location.search,
       '',
@@ -70,14 +70,17 @@ const GroupOverview = (props: Props) => {
       description: 'Share it with your group!',
     });
     console.log('toasted');
-  };
+  }, []);
 
   React.useEffect(() => {
     if (router.query.copyGroupLink) {
-      void handleCopyLink().then(() => {
-        delete router.query.copyGroupLink;
-        void router.push(router);
-      });
+      console.log('running handleCopyLink');
+      handleCopyLink()
+        .then(() => {
+          delete router.query.copyGroupLink;
+          router.push(router).catch(console.error);
+        })
+        .catch(console.error);
     }
   }, [handleCopyLink, router]);
 
