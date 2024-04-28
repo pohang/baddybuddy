@@ -39,6 +39,7 @@
     "lucide-react": "^0.259.0",
     "next": "^13.4.2",
     "react": "18.2.0",
+    "react-cropper": "^2.3.3",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.45.1",
     "superjson": "1.12.2",
