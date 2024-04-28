@@ -20,7 +20,14 @@ export default function Home() {
     },
     onSuccess: async (data) => {
       console.log(`Created group ${data.id}, redirecting to group page.`);
-      await router.push(`/groups/${data.id}?copyGroupLink=1`);
+      try {
+        await navigator.clipboard.writeText(
+          window.location.href + `/groups/${data.id}`,
+        );
+      } catch (e) {
+        console.error(e);
+      }
+      await router.push(`/groups/${data.id}?copiedGroupLink=1`);
     },
     onError: (error) => {
       console.log(`Error while creating group: ${error.message}.`);

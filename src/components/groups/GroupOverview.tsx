@@ -57,32 +57,28 @@ const GroupOverview = (props: Props) => {
 
   const { toast } = useToast();
 
-  const handleCopyLink = React.useCallback(async () => {
+  const handleCopyLink = async () => {
     const urlWithoutQueryParams = window.location.href.replace(
       window.location.search,
       '',
     );
-    console.log('copying the link ' + urlWithoutQueryParams);
     await navigator.clipboard.writeText(urlWithoutQueryParams);
-    console.log('copied the link');
     toast({
       title: 'Copied link to clipboard.',
       description: 'Share it with your group!',
     });
-    console.log('toasted');
-  }, []);
+  };
 
   React.useEffect(() => {
-    if (router.query.copyGroupLink) {
-      console.log('running handleCopyLink');
-      handleCopyLink()
-        .then(() => {
-          delete router.query.copyGroupLink;
-          router.push(router).catch(console.error);
-        })
-        .catch(console.error);
+    if (router.query.copiedGroupLink) {
+      toast({
+        title: 'Copied link to clipboard.',
+        description: 'Share it with your group!',
+      });
+      delete router.query.copyGroupLink;
+      router.push(router).catch(console.error);
     }
-  }, [handleCopyLink, router]);
+  }, [toast, router]);
 
   const handleCreateNewGroup = () => {
     createGroupMutation.mutate();
