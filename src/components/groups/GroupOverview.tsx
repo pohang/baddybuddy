@@ -17,6 +17,7 @@ import {
 import { useToast } from '~/components/ui/use-toast';
 import { api } from '~/utils/api';
 import { formatTime } from '~/utils/time';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import PlayerList from './PlayerList';
@@ -58,12 +59,25 @@ const GroupOverview = (props: Props) => {
   const { toast } = useToast();
 
   const handleCopyLink = async () => {
-    await navigator.clipboard.writeText(window.location.toString());
+    const urlWithoutQueryParams = window.location.href.replace(
+      window.location.search,
+      '',
+    );
+    await navigator.clipboard.writeText(urlWithoutQueryParams);
     toast({
       title: 'Copied link to clipboard.',
       description: 'Share it with your group!',
     });
   };
+
+  React.useEffect(() => {
+    if (router.query.copyGroupLink) {
+      void handleCopyLink().then(() => {
+        delete router.query.copyGroupLink;
+        void router.push(router);
+      });
+    }
+  });
 
   const handleCreateNewGroup = () => {
     createGroupMutation.mutate();
