@@ -62,11 +62,14 @@ const GroupOverview = (props: Props) => {
       window.location.search,
       '',
     );
+    console.log('copying the link ' + urlWithoutQueryParams);
     await navigator.clipboard.writeText(urlWithoutQueryParams);
+    console.log('copied the link');
     toast({
       title: 'Copied link to clipboard.',
       description: 'Share it with your group!',
     });
+    console.log('toasted');
   };
 
   React.useEffect(() => {
