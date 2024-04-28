@@ -17,7 +17,6 @@ import {
 import { useToast } from '~/components/ui/use-toast';
 import { api } from '~/utils/api';
 import { formatTime } from '~/utils/time';
-import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import PlayerList from './PlayerList';
@@ -77,7 +76,7 @@ const GroupOverview = (props: Props) => {
         void router.push(router);
       });
     }
-  });
+  }, [handleCopyLink, router]);
 
   const handleCreateNewGroup = () => {
     createGroupMutation.mutate();
