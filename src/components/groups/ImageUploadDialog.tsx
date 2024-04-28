@@ -11,6 +11,8 @@ import { Input } from '~/components/ui/input';
 import { api } from '~/utils/api';
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
+import Cropper, { type ReactCropperElement } from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
 
 type Props = {
   groupId: string;
@@ -27,6 +29,7 @@ const ImageUploadDialog = (props: Props) => {
   const [open, setOpen] = React.useState(false);
   const [uploadProcessing, setUploadProcessing] = React.useState(false);
   const [error, setError] = React.useState('');
+  const cropperRef = React.useRef<ReactCropperElement>(null);
 
   const presignedUrlMutation =
     api.signups.createPresignedUploadUrl.useMutation();
@@ -34,9 +37,18 @@ const ImageUploadDialog = (props: Props) => {
   const processSignupStateImageMutation =
     api.signups.processSignupStateImage.useMutation();
 
+  const getCanvasBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+      }, 'image/jpeg');
+    });
+  };
+
   const handleUpload = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (selectedFile == null) {
+    const cropper = cropperRef.current?.cropper;
+    if (selectedFile == null || cropper == null) {
       return;
     }
 
@@ -47,9 +59,10 @@ const ImageUploadDialog = (props: Props) => {
       setUploadProcessing(true);
       // upload to google cloud
       const presignedUrl = await presignedUrlMutation.mutateAsync();
+      const blob = await getCanvasBlob(cropper.getCroppedCanvas());
       await fetch(presignedUrl.presignedUrl, {
         method: 'PUT',
-        body: selectedFile,
+        body: blob,
       });
 
       // trigger processing of the image using vision api
@@ -105,7 +118,15 @@ const ImageUploadDialog = (props: Props) => {
           />
           {selectedFilePreviewUri ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={selectedFilePreviewUri} alt="signup preview" />
+            <Cropper
+              src={selectedFilePreviewUri}
+              ref={cropperRef}
+              viewMode={0} // crop box should not exceed size of canvas
+              zoomable={false}
+              scalable={false}
+              rotatable={false}
+              autoCropArea={1}
+            />
           ) : null}
           {error ? <p className="text-red-500">{error}</p> : null}
         </div>
