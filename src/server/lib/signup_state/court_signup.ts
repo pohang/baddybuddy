@@ -1,3 +1,5 @@
+import { type Prisma } from '.prisma/client';
+
 export type CourtSignup = {
   court: number;
   // null if court is reserved
@@ -7,6 +9,21 @@ export type CourtSignup = {
   // queuePosition == 0 means on court
   queuePosition: number;
   players: string[];
+};
+
+export const parseCourtSignupState = (
+  courtSignupState: Prisma.JsonValue,
+): CourtSignup[] => {
+  return (courtSignupState as Prisma.JsonArray).map((val) => {
+    const obj = val as Prisma.JsonObject;
+    return {
+      court: obj['court'] as number,
+      startsAt: obj['startsAt'] ? new Date(obj['startsAt'] as string) : null,
+      endsAt: obj['endsAt'] ? new Date(obj['endsAt'] as string) : null,
+      queuePosition: obj['queuePosition'] as number,
+      players: obj['players'] as string[],
+    };
+  });
 };
 
 export const formatSignups = (signups: CourtSignup[]) => {
