@@ -95,6 +95,8 @@ export const UpdateCourtDialog = (props: Props) => {
         type: 'custom',
         message: 'Must at least add one set of players.',
       });
+      setLoading(false);
+      return;
     }
 
     await updateSignupStateMutation.mutateAsync(
@@ -128,7 +130,7 @@ export const UpdateCourtDialog = (props: Props) => {
           <FontAwesomeIcon icon={faPenToSquare} />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent onOpenAutoFocus={(event) => event.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Update court</DialogTitle>
         </DialogHeader>
@@ -147,7 +149,12 @@ export const UpdateCourtDialog = (props: Props) => {
                   <div className="flex items-center justify-between">
                     <FormLabel>Minutes left</FormLabel>
                     <FormControl>
-                      <Input className="w-12" type="number" {...field} />
+                      <Input
+                        className="w-12"
+                        type="number"
+                        onFocus={(event) => event.target.select()}
+                        {...field}
+                      />
                     </FormControl>
                   </div>
                   <FormMessage />
