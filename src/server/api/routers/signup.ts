@@ -116,7 +116,7 @@ export const signupRouter = createTRPCRouter({
       const courtSignups = parseCourtSignupState(signupState.courtSignupState);
       courtSignups.forEach((signup) => {
         if (signup.endsAt?.getTime() === signupState.takenAt.getTime()) {
-          if (_.intersection(usernames, signup.players)) {
+          if (_.intersection(usernames, signup.players).length > 0) {
             courtsWithIssues.add(signup.court);
           }
         }
