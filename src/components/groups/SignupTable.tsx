@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { type TRPCClientErrorLike } from '@trpc/client';
 import { type UseTRPCQueryResult } from '@trpc/react-query/shared';
 import { type inferRouterOutputs } from '@trpc/server';
+import { UpdateCourtDialog } from '~/components/groups/UpdateCourtDialog';
 import { type AppRouter } from '~/server/api/root';
 import { getExpiringUrgency, UrgencyColors } from '~/utils/time';
 import * as React from 'react';
@@ -53,6 +54,9 @@ const PlayerList = (props: Props) => {
   const playerNames =
     playerQuery.data?.map((p) => p.username.toLowerCase()) || [];
 
+  const courtsWithErrors =
+    signupStateQuery?.data?.courtsWithIssues || new Set();
+
   const renderCourt = (court: number) => {
     const signups = signupStateQuery.data?.signupsByCourt?.get(court) || [];
     let minutesLeft;
@@ -78,7 +82,11 @@ const PlayerList = (props: Props) => {
         ? 'n/a'
         : minutesLeft;
     return (
-      <div className="flex flex-col text-xs">
+      <div
+        className={`flex flex-col text-xs ${
+          courtsWithErrors.has(court) ? 'border-red-400 border-2' : ''
+        }`}
+      >
         <div className="flex gap-1">
           <span className="font-bold">Court {court}</span>{' '}
           <div
@@ -87,6 +95,12 @@ const PlayerList = (props: Props) => {
             <FontAwesomeIcon icon={faClock}></FontAwesomeIcon>&nbsp;
             {minutesLeftLabel}
           </div>
+          <UpdateCourtDialog
+            signupStateId={signupStateQuery.data?.id || -1}
+            court={court}
+            imageUri={signupStateQuery.data?.imageUri}
+            onUpdate={() => signupStateQuery.refetch()}
+          />
         </div>
         <div>
           {signups.map((signup, signupI) => {
@@ -113,10 +127,18 @@ const PlayerList = (props: Props) => {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {Array.from({ length: 14 }, (_, i) => {
-        return renderCourt(i + 1);
-      })}
+    <div className="flex flex-col gap-4">
+      {courtsWithErrors.size > 0 ? (
+        <div className="text-red-300 text-xs">
+          Failed to read minutes left for courts marked in red, please add it
+          manually by clicking on the edit icon.
+        </div>
+      ) : null}
+      <div className="grid grid-cols-2 gap-4">
+        {Array.from({ length: 14 }, (_, i) => {
+          return renderCourt(i + 1);
+        })}
+      </div>
     </div>
   );
 };

@@ -2,7 +2,11 @@ import { createTRPCRouter, publicProcedure } from '~/server/api/trpc';
 import { GoogleVisionAiClient } from '~/server/lib/image_parser/google_vision_ai_client';
 import ImageStorage from '~/server/lib/image_storage/google_storage';
 import { processAnnotations } from '~/server/lib/signup_state/bintang_burlingame';
-import { type CourtSignup } from '~/server/lib/signup_state/court_signup';
+import {
+  parseCourtSignupState,
+  type CourtSignup,
+} from '~/server/lib/signup_state/court_signup';
+import _ from 'lodash';
 import { z } from 'zod';
 import { Prisma } from '.prisma/client';
 
@@ -92,6 +96,15 @@ export const signupRouter = createTRPCRouter({
         return null;
       }
 
+      const players = await ctx.prisma.player.findMany({
+        where: {
+          groupId: groupId,
+        },
+      });
+      const usernames = players.map((p) => p.username);
+
+      const courtsWithIssues: Set<number> = new Set();
+
       const signupsByCourt = new Map<
         number,
         {
@@ -100,21 +113,14 @@ export const signupRouter = createTRPCRouter({
           players: string[];
         }[]
       >();
-      const courtSignups: CourtSignup[] = (
-        signupState.courtSignupState as Prisma.JsonArray
-      ).map((val) => {
-        const obj = val as Prisma.JsonObject;
-        return {
-          court: obj['court'] as number,
-          startsAt: obj['startsAt']
-            ? new Date(obj['startsAt'] as string)
-            : null,
-          endsAt: obj['endsAt'] ? new Date(obj['endsAt'] as string) : null,
-          queuePosition: obj['queuePosition'] as number,
-          players: obj['players'] as string[],
-        };
-      });
+      const courtSignups = parseCourtSignupState(signupState.courtSignupState);
       courtSignups.forEach((signup) => {
+        if (signup.endsAt?.getTime() === signupState.takenAt.getTime()) {
+          if (_.intersection(usernames, signup.players)) {
+            courtsWithIssues.add(signup.court);
+          }
+        }
+
         if (signup.endsAt && signup.endsAt < currentTime) {
           return;
         }
@@ -137,10 +143,12 @@ export const signupRouter = createTRPCRouter({
       );
 
       return {
+        id: signupState.id,
         signupsByCourt,
         takenAt: signupState.takenAt,
         fileName: signupState.fileName,
         imageUri,
+        courtsWithIssues,
       };
     }),
 
@@ -159,5 +167,92 @@ export const signupRouter = createTRPCRouter({
       return {
         uploadTimes: signupStates.map((s) => s.takenAt),
       };
+    }),
+
+  getSignupStateForCourt: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        court: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { id, court } = input;
+      const signupState = await ctx.prisma.signupState.findUnique({
+        where: { id },
+      });
+      if (signupState == null) {
+        throw new Error(`could not find signup state ${id}`);
+      }
+
+      const courtSignups = parseCourtSignupState(signupState.courtSignupState);
+      const courtSignupsForCourt = courtSignups.filter(
+        (c) => c.court === court,
+      );
+      let minutesLeft = 0;
+      const firstSignupEndsAt = courtSignupsForCourt[0]?.endsAt;
+      if (firstSignupEndsAt) {
+        minutesLeft =
+          (firstSignupEndsAt.getTime() - signupState.takenAt.getTime()) /
+          1000 /
+          60;
+      }
+      return {
+        minutesLeft,
+        courtSignups: courtSignupsForCourt,
+      };
+    }),
+
+  updateSignupState: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        court: z.number(),
+        minutesLeft: z.number(),
+        players: z.array(z.array(z.string())),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, court, minutesLeft, players } = input;
+      const signupState = await ctx.prisma.signupState.findUnique({
+        where: { id },
+      });
+      if (signupState == null) {
+        throw new Error(`could not find signup state ${id}`);
+      }
+
+      const courtSignups = parseCourtSignupState(signupState.courtSignupState);
+
+      const courtSignupsWithoutModifiedCourt = courtSignups.filter((signup) => {
+        return signup.court !== court;
+      });
+
+      const takenAt = signupState.takenAt;
+      const newCourtSignups: CourtSignup[] = players.map((p, i) => {
+        const offset = i * 30 + minutesLeft;
+        const endsAt = new Date(takenAt);
+        endsAt.setMinutes(endsAt.getMinutes() + offset);
+        const startsAt = new Date(endsAt);
+        startsAt.setMinutes(startsAt.getMinutes() - 30);
+        return {
+          court,
+          startsAt,
+          endsAt,
+          queuePosition: i,
+          players: p,
+        };
+      });
+
+      const updatedCourtSignupState =
+        courtSignupsWithoutModifiedCourt.concat(newCourtSignups);
+
+      await ctx.prisma.signupState.update({
+        where: { id },
+        data: {
+          courtSignupState: updatedCourtSignupState as Prisma.JsonArray,
+        },
+      });
+
+      return null;
     }),
 });
