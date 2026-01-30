@@ -87,6 +87,10 @@ const GroupOverview = (props: Props) => {
     );
   }
 
+  if (!groupQuery.data) {
+    return null;
+  }
+
   const venueConfig = getVenueConfig(groupQuery.data.venue);
 
   return (

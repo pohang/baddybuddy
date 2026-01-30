@@ -72,6 +72,10 @@ const OurCourtsList = (props: Props) => {
     );
   }
 
+  if (!playerQuery.data) {
+    return null;
+  }
+
   // Find signups that contain a name that's part of our group.
   const playerData = _.keyBy(
     playerQuery.data.map((player) => ({

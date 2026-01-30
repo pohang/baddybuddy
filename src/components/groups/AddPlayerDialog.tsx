@@ -39,7 +39,7 @@ const formSchema = z.object({
   password: z.string().min(1, {
     message: 'Password must be at least 1 character.',
   }),
-  addAnother: z.boolean().optional().default(false),
+  addAnother: z.boolean(),
 });
 
 const AddPlayerDialog = (props: Props) => {

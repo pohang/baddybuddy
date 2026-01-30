@@ -32,7 +32,7 @@ type Props = {
 };
 
 const formSchema = z.object({
-  minutesLeft: z.coerce.number(),
+  minutesLeft: z.number(),
   onCourt: z.string(),
   queue1: z.string(),
   queue2: z.string(),
@@ -60,6 +60,13 @@ export const UpdateCourtDialog = (props: Props) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      minutesLeft: 0,
+      onCourt: '',
+      queue1: '',
+      queue2: '',
+      queue3: '',
+    },
   });
 
   // Reset the form when the query data changes so that the default values populate properly.
@@ -154,6 +161,7 @@ export const UpdateCourtDialog = (props: Props) => {
                         type="number"
                         onFocus={(event) => event.target.select()}
                         {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                   </div>

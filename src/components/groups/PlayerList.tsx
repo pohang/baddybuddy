@@ -57,6 +57,10 @@ const PlayerList = (props: Props) => {
     );
   }
 
+  if (!playerQuery.data) {
+    return null;
+  }
+
   const players = playerQuery.data;
   const playerStatus = new Map<
     string,
