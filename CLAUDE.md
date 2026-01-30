@@ -9,11 +9,11 @@ Baddybuddy is a web app for managing badminton signups. It uses OCR (Google Clou
 ## Commands
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Production build
-npm run lint     # ESLint
-npx vitest       # Run tests
-npx prisma db push  # Apply schema changes to database
+bun run dev      # Start development server
+bun run build    # Production build
+bun run lint     # ESLint
+bun vitest       # Run tests
+bun prisma db push  # Apply schema changes to database
 ```
 
 ## Tech Stack
