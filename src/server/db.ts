@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { env } from '~/env.mjs';
 
 const globalForPrisma = globalThis as unknown as {
@@ -8,6 +9,7 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
+    adapter: new PrismaPg({connectionString: env.DATABASE_URL}),
     log:
       env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
