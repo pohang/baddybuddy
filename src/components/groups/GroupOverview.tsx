@@ -50,12 +50,6 @@ const GroupOverview = (props: Props) => {
       enabled: !!groupId,
     },
   );
-  const createGroupMutation = api.groups.createGroup.useMutation({
-    onSuccess: async (data) => {
-      await router.push(`/groups/${data.id}`);
-    },
-  });
-
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(window.location.toString());
     toast('Copied link to clipboard.', {
@@ -63,8 +57,8 @@ const GroupOverview = (props: Props) => {
     });
   };
 
-  const handleCreateNewGroup = () => {
-    createGroupMutation.mutate();
+  const handleCreateNewGroup = async () => {
+    await router.push('/');
   };
 
   if (groupQuery.isLoading) {
@@ -99,8 +93,9 @@ const GroupOverview = (props: Props) => {
             playerCount={playerQuery.data?.length || 0}
             onPlayerAdd={playerQuery.refetch}
           />
-          <div className="flex flex-col">
+          <div className="flex flex-col items-center">
             <h1 className="text-4xl">{groupId}</h1>
+            <p className="text-muted-foreground">{venueConfig.displayName}</p>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
