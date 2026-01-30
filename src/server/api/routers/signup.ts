@@ -1,3 +1,4 @@
+import { getVenueConfig } from '~/lib/venues';
 import { createTRPCRouter, publicProcedure } from '~/server/api/trpc';
 import { GoogleVisionAiClient } from '~/server/lib/image_parser/google_vision_ai_client';
 import ImageStorage from '~/server/lib/image_storage/google_storage';
@@ -33,9 +34,18 @@ export const signupRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { groupId, fileName, takenAt } = input;
+      const group = await ctx.prisma.group.findUniqueOrThrow({
+        where: { id: groupId },
+      });
+      const venueConfig = getVenueConfig(group.venue);
       const annotations = await imageParser.parseImage({ fileName });
 
-      const { courtSignups } = processAnnotations({ annotations, takenAt });
+      const { courtSignups } = processAnnotations({
+        annotations,
+        takenAt,
+        expectedNumCourts: venueConfig.courtCount,
+        courtsPerRow: venueConfig.courtsPerRow,
+      });
       await ctx.prisma.signupState.create({
         data: {
           fileName,
@@ -55,10 +65,12 @@ export const signupRouter = createTRPCRouter({
     .input(
       z.object({
         fileName: z.string().min(1),
+        venue: z.string().optional(),
       }),
     )
     .query(async ({ input }) => {
-      const { fileName } = input;
+      const { fileName, venue } = input;
+      const venueConfig = getVenueConfig(venue ?? 'bintang_burlingame');
       const annotations = await imageParser.parseImage({ fileName });
 
       const imageUri = await imageStorage.getPresignedUrlForDownload(fileName);
@@ -66,6 +78,8 @@ export const signupRouter = createTRPCRouter({
       const { courtDebugInfo, courtSignups } = processAnnotations({
         annotations,
         takenAt: new Date(),
+        expectedNumCourts: venueConfig.courtCount,
+        courtsPerRow: venueConfig.courtsPerRow,
       });
 
       return {

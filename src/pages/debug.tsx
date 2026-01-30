@@ -5,6 +5,7 @@ import OurCourtsList from '~/components/groups/OurCourtsList';
 import PlayerList from '~/components/groups/PlayerList';
 import SignupTable from '~/components/groups/SignupTable';
 import { Input } from '~/components/ui/input';
+import { getVenueConfig } from '~/lib/venues';
 import { type AppRouter } from '~/server/api/root';
 import { api } from '~/utils/api';
 import { formatTime } from '~/utils/time';
@@ -113,12 +114,18 @@ export default function Debug() {
   const [timeOverrideValue, setTimeOverrideValue] = React.useState('');
   const [timeOverride, setTimeOverride] = React.useState<Date | null>(null);
 
+  const groupQuery = api.groups.getGroup.useQuery(
+    { groupId },
+    { enabled: !!groupId },
+  );
   const uploadTimesQuery = api.signups.getUploadTimes.useQuery({ groupId });
   const playerQuery = api.players.getPlayers.useQuery({ groupId });
   const signupStateQuery = api.signups.getSignupState.useQuery({
     groupId,
     currentTime: timeOverride ?? undefined,
   });
+
+  const venueConfig = getVenueConfig(groupQuery.data?.venue ?? 'bintang_burlingame');
 
   const debugSignupStateImageQuery = api.signups.debugSignupStateImage.useQuery(
     {
@@ -208,6 +215,7 @@ export default function Debug() {
             playerQuery={playerQuery}
             signupStateQuery={signupStateQuery}
             timeOverride={timeOverride}
+            courtCount={venueConfig.courtCount}
           />
         ) : null}
         {JSON.stringify(debugSignupStateImageQuery.data?.courtSignups)}

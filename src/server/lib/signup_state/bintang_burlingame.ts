@@ -15,7 +15,8 @@ import {
 } from '~/server/lib/signup_state/utils';
 import { transliterate } from 'transliteration';
 
-const EXPECTED_NUM_GROUPS = 14;
+const DEFAULT_EXPECTED_NUM_COURTS = 14;
+const DEFAULT_COURTS_PER_ROW = 4;
 const COURT_SIGNUP_DURATION_MINUTES = 30;
 
 type CourtDebugInfo = {
@@ -33,9 +34,13 @@ type ProcessAnnotationsResponse = {
 export const processAnnotations = ({
   annotations,
   takenAt,
+  expectedNumCourts = DEFAULT_EXPECTED_NUM_COURTS,
+  courtsPerRow = DEFAULT_COURTS_PER_ROW,
 }: {
   annotations: TextAnnotationsResponse;
   takenAt: Date;
+  expectedNumCourts?: number;
+  courtsPerRow?: number;
 }): ProcessAnnotationsResponse => {
   const { textAnnotations } = annotations;
   if (textAnnotations == null) {
@@ -60,12 +65,12 @@ export const processAnnotations = ({
     findTopLeftVerticesOfLargestText({
       textAnnotations: annotationWithRectangles,
       word: 'Court',
-      n: EXPECTED_NUM_GROUPS,
+      n: expectedNumCourts,
     });
 
   const topLeftVerticesOfCourtGrid = verticesAsGrid({
     vertices: topLeftVerticesOfLargestInstancesOfCourt,
-    perRow: 4,
+    perRow: courtsPerRow,
   });
 
   const courtSignups: CourtSignup[] = [];
@@ -73,7 +78,7 @@ export const processAnnotations = ({
 
   for (let row = 0; row < topLeftVerticesOfCourtGrid.length; row += 1) {
     for (let col = 0; col < topLeftVerticesOfCourtGrid[row]!.length; col += 1) {
-      const court = row * 4 + (col + 1);
+      const court = row * courtsPerRow + (col + 1);
       const boundingPolyForCourt = getRectangleForCourt({
         topLeftVertices: topLeftVerticesOfCourtGrid,
         row,

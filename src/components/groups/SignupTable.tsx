@@ -19,10 +19,11 @@ type Props = {
     TRPCClientErrorLike<AppRouter>
   >;
   timeOverride?: Date | null;
+  courtCount: number;
 };
 
 const PlayerList = (props: Props) => {
-  const { playerQuery, signupStateQuery, timeOverride } = props;
+  const { playerQuery, signupStateQuery, timeOverride, courtCount } = props;
   const now = timeOverride || new Date();
 
   if (playerQuery.isLoading || signupStateQuery.isLoading) {
@@ -135,7 +136,7 @@ const PlayerList = (props: Props) => {
         </div>
       ) : null}
       <div className="grid grid-cols-2 gap-4">
-        {Array.from({ length: 14 }, (_, i) => {
+        {Array.from({ length: courtCount }, (_, i) => {
           return renderCourt(i + 1);
         })}
       </div>

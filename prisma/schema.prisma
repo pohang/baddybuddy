@@ -15,6 +15,7 @@ model Group {
   id           String        @id
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  venue        String        @default("bintang_burlingame") @map("location")
   signupStates SignupState[]
   players      Player[]
 }

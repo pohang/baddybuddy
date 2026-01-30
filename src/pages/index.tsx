@@ -1,10 +1,19 @@
 import { Button } from '~/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select';
 import { useToast } from '~/components/ui/use-toast';
+import { DEFAULT_VENUE, VENUES, type VenueId } from '~/lib/venues';
 import { api } from '~/utils/api';
 import { Loader2 } from 'lucide-react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import * as React from 'react';
+import { useLocalStorage } from 'usehooks-ts';
 
 export default function Home() {
   const router = useRouter();
@@ -12,6 +21,10 @@ export default function Home() {
   const [createGroupError, setCreateGroupError] = React.useState<
     string | null
   >();
+  const [selectedVenue, setSelectedVenue] = useLocalStorage<VenueId>(
+    'baddybuddy-venue',
+    DEFAULT_VENUE,
+  );
   const { toast } = useToast();
 
   const copyGroupIdLink = async () => {
@@ -42,6 +55,10 @@ export default function Home() {
     },
   });
 
+  const handleVenueChange = (value: string) => {
+    setSelectedVenue(value as VenueId);
+  };
+
   return (
     <>
       <Head>
@@ -53,17 +70,31 @@ export default function Home() {
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-4xl">Baddy Buddy</h1>
         </div>
-        <Button
-          onClick={() => {
-            createGroupMutation.mutate();
-          }}
-          disabled={createGroupLoading}
-        >
-          {createGroupLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : null}
-          Create group
-        </Button>
+        <div className="flex flex-col gap-4 items-center">
+          <Select value={selectedVenue} onValueChange={handleVenueChange}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select venue" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.values(VENUES).map((venue) => (
+                <SelectItem key={venue.id} value={venue.id}>
+                  {venue.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={() => {
+              createGroupMutation.mutate({ venue: selectedVenue });
+            }}
+            disabled={createGroupLoading}
+          >
+            {createGroupLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            Create group
+          </Button>
+        </div>
         {createGroupError ? (
           <p className="text-red-500">{createGroupError}</p>
         ) : null}

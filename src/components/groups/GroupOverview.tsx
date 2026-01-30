@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
 import { useToast } from '~/components/ui/use-toast';
+import { getVenueConfig } from '~/lib/venues';
 import { api } from '~/utils/api';
 import { formatTime } from '~/utils/time';
 import { useRouter } from 'next/router';
@@ -86,6 +87,8 @@ const GroupOverview = (props: Props) => {
     );
   }
 
+  const venueConfig = getVenueConfig(groupQuery.data.venue);
+
   return (
     <div className="flex flex-col items-stretch justify-center gap-4">
       <div className="flex flex-col gap-4">
@@ -152,6 +155,7 @@ const GroupOverview = (props: Props) => {
             <SignupTable
               playerQuery={playerQuery}
               signupStateQuery={signupStateQuery}
+              courtCount={venueConfig.courtCount}
             />
           ) : null}
           {signupStateQuery.data?.imageUri ? (
