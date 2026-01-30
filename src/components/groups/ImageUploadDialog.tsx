@@ -12,6 +12,7 @@ import { api } from '~/utils/api';
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 import Cropper, { type ReactCropperElement } from 'react-cropper';
+import 'cropperjs/dist/cropper.css';
 
 type Props = {
   groupId: string;

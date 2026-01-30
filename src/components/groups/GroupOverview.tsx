@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '~/components/ui/dropdown-menu';
-import { useToast } from '~/components/ui/use-toast';
+import { toast } from 'sonner';
 import { getVenueConfig } from '~/lib/venues';
 import { api } from '~/utils/api';
 import { formatTime } from '~/utils/time';
@@ -56,12 +56,9 @@ const GroupOverview = (props: Props) => {
     },
   });
 
-  const { toast } = useToast();
-
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(window.location.toString());
-    toast({
-      title: 'Copied link to clipboard.',
+    toast('Copied link to clipboard.', {
       description: 'Share it with your group!',
     });
   };

@@ -4,11 +4,17 @@ import '~/styles/globals.css';
 // fixes a bug where icons are extra large on the first load.
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
+import { Toaster } from '~/components/ui/sonner';
 
 config.autoAddCss = false;
 
 const MyApp: AppType = ({ Component, pageProps }) => {
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Component {...pageProps} />
+      <Toaster />
+    </>
+  );
 };
 
 export default api.withTRPC(MyApp);

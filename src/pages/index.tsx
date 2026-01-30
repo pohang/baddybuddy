@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import { useToast } from '~/components/ui/use-toast';
+import { toast } from 'sonner';
 import { DEFAULT_VENUE, VENUES, type VenueId } from '~/lib/venues';
 import { api } from '~/utils/api';
 import { Loader2 } from 'lucide-react';
@@ -25,12 +25,9 @@ export default function Home() {
     'baddybuddy-venue',
     DEFAULT_VENUE,
   );
-  const { toast } = useToast();
-
   const copyGroupIdLink = async () => {
     await navigator.clipboard.writeText(window.location.toString());
-    toast({
-      title: 'Copied link to clipboard.',
+    toast('Copied link to clipboard.', {
       description: 'Share it with your group!',
     });
   };
