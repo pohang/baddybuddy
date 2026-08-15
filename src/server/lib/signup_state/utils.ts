@@ -117,6 +117,22 @@ const padRectangle = (
   };
 };
 
+// Two words belong to the same row when their vertical extents overlap by more
+// than half the shorter word's height. Testing "previous bottom is above the
+// next top" instead merges rows whose bounding boxes touch exactly, which is
+// how a court's "Reserved at: <when>" row gets joined to the "Current Players"
+// row beneath it, turning the reservation text into player names.
+const isOnSameLine = (a: Rectangle, b: Rectangle): boolean => {
+  const overlap =
+    Math.min(a.bottomLeft.y, b.bottomLeft.y) -
+    Math.max(a.topLeft.y, b.topLeft.y);
+  const shorterHeight = Math.min(
+    a.bottomLeft.y - a.topLeft.y,
+    b.bottomLeft.y - b.topLeft.y,
+  );
+  return shorterHeight > 0 && overlap / shorterHeight > 0.5;
+};
+
 export const groupAnnotationsAsLines = (
   annotations: AnnotationWithRectangle[],
 ) => {
@@ -139,7 +155,7 @@ export const groupAnnotationsAsLines = (
       return;
     }
 
-    if (lastRectangle && lastRectangle.bottomLeft.y < rectangle.topLeft.y) {
+    if (lastRectangle && !isOnSameLine(lastRectangle, rectangle)) {
       lines.push(outputAsLine(currentLine));
       currentLine = [];
     }
