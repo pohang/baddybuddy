@@ -6,7 +6,7 @@ describe('formatTime', () => {
     const time = new Date(2023, 1, 1, 4, 40);
     const now = new Date(2023, 1, 1, 4, 50);
     const result = formatTime(time, now);
-    expect(result).toEqual('4:40 (10 minutes ago)');
+    expect(result).toEqual('4:40 (10 min. ago)');
   });
 
   it('works for time that is now', () => {
@@ -20,20 +20,20 @@ describe('formatTime', () => {
     const time = new Date(2023, 1, 1, 4, 50);
     const now = new Date(2023, 1, 1, 4, 40);
     const result = formatTime(time, now);
-    expect(result).toEqual('4:50 (in 10 minutes)');
+    expect(result).toEqual('4:50 (in 10 min.)');
   });
 
   it('works for pm', () => {
     const time = new Date(2023, 1, 1, 15, 40);
     const now = new Date(2023, 1, 1, 15, 50);
     const result = formatTime(time, now);
-    expect(result).toEqual('3:40 (10 minutes ago)');
+    expect(result).toEqual('3:40 (10 min. ago)');
   });
 
   it('shows 12 instead of 0', () => {
     const time = new Date(2023, 1, 1, 12, 40);
     const now = new Date(2023, 1, 1, 15, 50);
     const result = formatTime(time, now);
-    expect(result).toEqual('12:40 (190 minutes ago)');
+    expect(result).toEqual('12:40 (190 min. ago)');
   });
 });
