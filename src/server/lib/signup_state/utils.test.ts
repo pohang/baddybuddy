@@ -1,3 +1,4 @@
+import { type Rectangle } from '~/server/lib/signup_state/rectangle';
 import {
   findTopLeftVerticesOfLargestText,
   verticesAsGrid,
@@ -10,9 +11,7 @@ describe('findTopLeftVerticesOfLargestText', () => {
       textAnnotations: [
         {
           description: 'foo',
-          boundingPoly: {
-            vertices: makeRectangleVertices(10, 20, 30, 40),
-          },
+          rectangle: makeRectangle(10, 20, 30, 40),
         },
       ],
       word: 'foo',
@@ -28,9 +27,7 @@ describe('findTopLeftVerticesOfLargestText', () => {
       textAnnotations: [
         {
           description: 'foo',
-          boundingPoly: {
-            vertices: makeRectangleVertices(10, 20, 30, 40),
-          },
+          rectangle: makeRectangle(10, 20, 30, 40),
         },
       ],
       word: 'foo',
@@ -45,31 +42,23 @@ describe('findTopLeftVerticesOfLargestText', () => {
       textAnnotations: [
         {
           description: 'foo',
-          boundingPoly: {
-            // area = 100
-            vertices: makeRectangleVertices(10, 20, 30, 40),
-          },
+          // area = 100
+          rectangle: makeRectangle(10, 20, 30, 40),
         },
         {
           description: 'foo',
-          boundingPoly: {
-            // area = 300
-            vertices: makeRectangleVertices(50, 80, 20, 30),
-          },
+          // area = 300
+          rectangle: makeRectangle(50, 80, 20, 30),
         },
         {
           description: 'bar',
-          boundingPoly: {
-            // area = 800
-            vertices: makeRectangleVertices(0, 80, 20, 30),
-          },
+          // area = 800
+          rectangle: makeRectangle(0, 80, 20, 30),
         },
         {
           description: 'foo',
-          boundingPoly: {
-            // area = 50
-            vertices: makeRectangleVertices(0, 10, 0, 5),
-          },
+          // area = 50
+          rectangle: makeRectangle(0, 10, 0, 5),
         },
       ],
       word: 'foo',
@@ -114,16 +103,16 @@ describe('verticesAsGrid', () => {
   });
 });
 
-const makeRectangleVertices = (
+const makeRectangle = (
   x1: number,
   x2: number,
   y1: number,
   y2: number,
-) => {
-  return [
-    { x: x1, y: y1 },
-    { x: x1, y: y2 },
-    { x: x2, y: y1 },
-    { x: x2, y: y2 },
-  ];
+): Rectangle => {
+  return {
+    topLeft: { x: x1, y: y1 },
+    topRight: { x: x2, y: y1 },
+    bottomLeft: { x: x1, y: y2 },
+    bottomRight: { x: x2, y: y2 },
+  };
 };

@@ -231,6 +231,13 @@ const isASCII = (str: string) => {
 };
 
 const getNamesFromLine = (line: string[]): string[] => {
+  // A reservation notice ("Reserved at Challenge Court at 2pm") sometimes gets
+  // grouped onto the same line as "Current Players". A reserved court has no
+  // current players, so none of the words on such a line are names.
+  if (line.some((w) => w.toLowerCase().includes('reserved'))) {
+    return [];
+  }
+
   return line
     .map((l) => cleanUsername(l))
     .filter((w) => {
